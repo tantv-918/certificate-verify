@@ -17,6 +17,9 @@
   "dependencies": {
     "fabric-ca-client": "~1.4.0",
     "fabric-network": "~1.4.0",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7",
+    "util": "^0.12.1",
     "yargs": "^14.0.0"
   },
   "devDependencies": {
