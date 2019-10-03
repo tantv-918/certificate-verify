@@ -3,19 +3,22 @@ const { Schema } = mongoose;
 const bcrypt = require('bcryptjs');
 
 const UserSchema = new Schema({
-  email: {
+  username: {
     type: String,
     trim: true,
     lowercase: true,
     unique: true,
     required: [true, "can't be blank"],
-    match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address']
+    match: [/^[a-zA-Z0-9]+$/, 'is invalid']
   },
   password: {
     type: String,
     required: [true, "can't be blank"]
   },
-  name: String
+  name: {
+    type: String,
+    trim: true
+  }
 });
 
 UserSchema.pre('save', function(next) {

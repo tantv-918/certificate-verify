@@ -22,11 +22,11 @@ describe('Route : /auth', () => {
       saveUserStub.restore();
     });
 
-    it('should be invalid if email password and name is empty', (done) => {
+    it('should be invalid if username password and name is empty', (done) => {
       request(app)
         .post('/auth/register')
         .send({
-          email: '',
+          username: '',
           password: '',
           name: ''
         })
@@ -43,7 +43,7 @@ describe('Route : /auth', () => {
       request(app)
         .post('/auth/register')
         .send({
-          email: 'trasasailang98@gmail.com',
+          username: 'hoangdd',
           password: '123456',
           name: 'Do Duc Hoang'
         })
@@ -54,10 +54,10 @@ describe('Route : /auth', () => {
         });
     });
 
-    it('shoud fail because the email already exists.', (done) => {
-      // found a record email: 'trailang98',
+    it('shoud fail because the username already exists.', (done) => {
+      // found a record username: 'trailang98',
       findOneUserStub.yields(undefined, {
-        email: 'trasasailang98@gmail.com',
+        username: 'hoangdd',
         password: '654321',
         name: '12'
       });
@@ -65,7 +65,7 @@ describe('Route : /auth', () => {
       request(app)
         .post('/auth/register')
         .send({
-          email: 'trasasailang98@gmail.com',
+          username: 'hoangdd',
           password: '1234567',
           name: 'aasddd'
         })
@@ -87,11 +87,11 @@ describe('Route : /auth', () => {
       findOneUserStub.restore();
     });
 
-    it('should be invalid if email password is empty', (done) => {
+    it('should be invalid if username password is empty', (done) => {
       request(app)
         .post('/auth/login')
         .send({
-          email: '',
+          username: '',
           password: ''
         })
         .then((res) => {
@@ -101,25 +101,25 @@ describe('Route : /auth', () => {
         });
     });
 
-    it('shoud fail because can not find email', (done) => {
+    it('shoud fail because can not find username', (done) => {
       findOneUserStub.yields(undefined, null);
 
       request(app)
         .post('/auth/login')
         .send({
-          email: 'trasasailang98@gmail.com',
+          username: 'hoangddhaycuphoc',
           password: '1234567'
         })
         .then((res) => {
           expect(res.status).equal(200);
-          expect(res.body.msg).equal('email not exits');
+          expect(res.body.msg).equal('username not exits');
           done();
         });
     });
 
     it('shoud fail because wrong password', (done) => {
       findOneUserStub.yields(undefined, {
-        email: 'trasasailang98@gmail.com',
+        username: 'hoangdd',
         password: '654321',
         name: 'hoang'
       });
@@ -127,7 +127,7 @@ describe('Route : /auth', () => {
       request(app)
         .post('/auth/login')
         .send({
-          email: 'trasasailang98@gmail.com',
+          username: 'hoangdd',
           password: '78945612'
         })
         .then((res) => {
@@ -139,7 +139,7 @@ describe('Route : /auth', () => {
 
     it('should login success', (done) => {
       findOneUserStub.yields(undefined, {
-        email: 'trasasailang98@gmail.com',
+        username: 'hoangdd',
         password: '$2a$10$hqZtIwFcl8SLaUbxkuPOEeKqvTknWFodjVaYVdXoZ0EeIb3SjT/dG',
         name: 'alibaba'
       });
@@ -147,7 +147,7 @@ describe('Route : /auth', () => {
       request(app)
         .post('/auth/login')
         .send({
-          email: 'trasasailang98@gmail.com',
+          username: 'hoangdd',
           password: '654321'
         })
         .then((res) => {

@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken');
+let secretJWT = require('../config/index').secret;
 
 module.exports = (req, res, next) => {
   let token = req.headers['authorization'];
 
   if (token) {
-    jwt.verify(token, 'supersecret123', (err, decoded) => {
+    jwt.verify(token, secretJWT, (err, decoded) => {
       if (err) {
         res.json({
           success: false,

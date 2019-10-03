@@ -5,10 +5,9 @@ const user = JSON.parse(localStorage.getItem('user'));
 const state = user ? { status: { loggedIn: true }, user } : { status: {}, user: null };
 
 const actions = {
-  login({ dispatch, commit }, { email, password }) {
-    commit('loginRequest', { email });
-
-    userService.login(email, password).then(
+  login({ dispatch, commit }, { username, password }) {
+    commit('loginRequest', { username });
+    userService.login(username, password).then(
       (user) => {
         commit('loginSuccess', user);
         router.push('/');
