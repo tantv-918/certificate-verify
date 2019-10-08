@@ -25,9 +25,7 @@
 
               <template slot="Name" slot-scope="row">{{ row.item.Name }}</template>
 
-              <template slot="total" slot-scope="row">{{ row.item.total }}</template>
-
-              <template slot="delete" slot-scope="row">
+              <template slot="actions" slot-scope="row">
                 <div class="row justify-content-center">
                   <b-button
                     variant="danger"
@@ -83,8 +81,7 @@ export default {
       subjectsOfTeacher1: [
         {
           SubjectID: 1,
-          Name: "Subject01",
-          total: 10
+          Name: "Subject01"
         }
       ],
       fields: [
@@ -100,9 +97,8 @@ export default {
           class: "text-center",
           sortable: true
         },
-        { key: "total", label: "total", class: "text-center", sortable: true },
         {
-          key: "delete",
+          key: "actions",
           label: "Actions",
           class: "text-center",
           sortable: true

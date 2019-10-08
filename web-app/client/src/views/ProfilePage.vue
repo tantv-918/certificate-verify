@@ -132,16 +132,6 @@
                                 />
                               </div>
                             </div>
-                            <div class="col-lg-6">
-                              <div class="form-group focused">
-                                <input
-                                  id="input-numberphone"
-                                  class="form-control form-control-alternative"
-                                  placeholder="Number Phone"
-                                  type="text"
-                                />
-                              </div>
-                            </div>
                           </div>
                         </div>
                         <hr class="my-4" />
