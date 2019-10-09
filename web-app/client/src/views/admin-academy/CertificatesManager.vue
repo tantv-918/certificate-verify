@@ -21,7 +21,7 @@
               :current-page="currentPage"
               :per-page="perPage"
             >
-              <template slot="id" slot-scope="row">{{ row.item.SubjectID }}</template>
+              <template slot="SubjectID" slot-scope="row">{{ row.item.SubjectID }}</template>
 
               <template slot="Name" slot-scope="row">{{ row.item.Name }}</template>
 
@@ -186,7 +186,12 @@ export default {
         }
       ],
       fields: [
-        { key: "id", label: "id", class: "text-center", sortable: true },
+        {
+          key: "SubjectID",
+          label: "SubjectID",
+          class: "text-center",
+          sortable: true
+        },
         {
           key: "Name",
           label: "Name Subject",

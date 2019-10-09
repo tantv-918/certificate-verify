@@ -18,7 +18,7 @@
 <script>
 import { SlideYUpTransition } from "vue2-transitions";
 import NavbarHeader from "@/components/common/NavbarHeader";
-import SidebarLeftAdmin from "@/components/admin-academy/SidebarLeftAdmin";
+import SidebarLeftAdmin from "@/components/common/SidebarLeftAdmin";
 export default {
   name: "navbar-header",
   components: {

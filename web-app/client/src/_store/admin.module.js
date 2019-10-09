@@ -18,7 +18,7 @@ const actions = {
       commit('getAllSubjects', listSubjects);
     } catch (error) {
       console.log(error);
-      if (error.message.includes('403')) {
+      if ('403'.includes(error.message)) {
         router.push('/403');
       }
     }
@@ -29,7 +29,7 @@ const actions = {
       commit('createSubject', listSubjects);
     } catch (error) {
       console.log(error);
-      if (error.message.includes('403')) {
+      if ('403'.includes(error.message)) {
         router.push('/403');
       }
     }
@@ -40,7 +40,7 @@ const actions = {
       commit('updateSubject', listSubjects);
     } catch (error) {
       console.log(error);
-      if (error.message.includes('403')) {
+      if ('403'.includes(error.message)) {
         router.push('/403');
       }
     }
@@ -51,7 +51,7 @@ const actions = {
       commit('deleteSubject', listSubjects);
     } catch (error) {
       console.log(error);
-      if (error.message.includes('403')) {
+      if ('403'.includes(error.message)) {
         router.push('/403');
       }
     }
@@ -64,7 +64,7 @@ const actions = {
       commit('getStudentsOfSubject', listStudents);
     } catch (error) {
       console.log(error);
-      if (error.message.includes('403')) {
+      if ('403'.includes(error.message)) {
         router.push('/403');
       }
     }
@@ -75,7 +75,7 @@ const actions = {
       commit('deleteStudentOfSubject', listSubjects);
     } catch (error) {
       console.log(error);
-      if (error.message.includes('403')) {
+      if ('403'.includes(error.message)) {
         router.push('/403');
       }
     }
@@ -88,7 +88,7 @@ const actions = {
       commit('getAllTeachers', listTeachers);
     } catch (error) {
       console.log(error);
-      if (error.message.includes('403')) {
+      if ('403'.includes(error.message)) {
         router.push('/403');
       }
     }
@@ -99,7 +99,7 @@ const actions = {
       commit('deleteTeacher', listTeachers);
     } catch (error) {
       console.log(error);
-      if (error.message.includes('403')) {
+      if ('403'.includes(error.message)) {
         router.push('/403');
       }
     }
@@ -112,7 +112,7 @@ const actions = {
       commit('getSubjectsOfTeacher', listSubjects);
     } catch (error) {
       console.log(error);
-      if (error.message.includes('403')) {
+      if ('403'.includes(error.message)) {
         router.push('/403');
       }
     }
@@ -123,7 +123,7 @@ const actions = {
       commit('deleteSubjectOfTeacher', listSubjects);
     } catch (error) {
       console.log(error);
-      if (error.message.includes('403')) {
+      if ('403'.includes(error.message)) {
         router.push('/403');
       }
     }
@@ -134,7 +134,7 @@ const actions = {
       commit('addSubjectOfTeacher', listSubjects);
     } catch (error) {
       console.log(error);
-      if (error.message.includes('403')) {
+      if ('403'.includes(error.message)) {
         router.push('/403');
       }
     }

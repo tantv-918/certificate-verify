@@ -41,7 +41,7 @@
                       variant="success"
                       @click="confirmCertificate(row.item)"
                       class="float-left btn-circle btn-sm"
-                      :Username="`popover-confirm-${row.item.Username}`"
+                      :id="`popover-confirm-${row.item.Username}`"
                       v-if="!row.item.statusConfirm"
                     >
                       <b-popover

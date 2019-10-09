@@ -2,7 +2,15 @@ import { authService } from '../_services/auth.service';
 import { router } from '../router';
 
 const user = JSON.parse(localStorage.getItem('user'));
-const state = user ? { status: { loggedIn: true }, user } : { status: {}, user: null };
+const state = user
+  ? {
+      status: { loggedIn: true },
+      user
+    }
+  : {
+      status: {},
+      user: null
+    };
 
 const actions = {
   login({ dispatch, commit }, { username, password }) {
@@ -10,7 +18,7 @@ const actions = {
     authService.login(username, password).then(
       (user) => {
         commit('loginSuccess', user);
-        router.push('/academy');
+        router.push('/home');
       },
       (error) => {
         commit('loginFailure', error);

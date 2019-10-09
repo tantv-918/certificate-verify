@@ -4,12 +4,13 @@ import Vuex from 'vuex';
 import { account } from './account.module';
 import { alert } from './alert.module';
 import { adminAcademy } from './admin.module';
+import { student } from './student.module';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    status_sidebar: false
+    statusSidebar: false
   },
   actions: {
     changeStatusSidebar({ commit }) {
@@ -18,12 +19,13 @@ export default new Vuex.Store({
   },
   mutations: {
     changeStatusSidebar(state) {
-      state.status_sidebar = !state.status_sidebar;
+      state.statusSidebar = !state.statusSidebar;
     }
   },
   modules: {
     account,
     alert,
-    adminAcademy
+    adminAcademy,
+    student
   }
 });

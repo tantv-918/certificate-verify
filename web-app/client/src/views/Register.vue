@@ -6,13 +6,13 @@
         <ValidationObserver ref="observer" v-slot="{ passes }">
           <b-form @submit.prevent="passes(onSubmit);" @reset="onReset">
             <div v-if="alert.message" :class="`text-center alert ${alert.type}`">{{alert.message}}</div>
-            <ValidationProvider rules="required" name="Name" v-slot="{ valid, errors }">
-              <b-form-group label="Name:" label-for="Name">
+            <ValidationProvider rules="required|min:6" name="Fullname" v-slot="{ valid, errors }">
+              <b-form-group label="Fullname:" label-for="Fullname">
                 <b-form-input
                   type="text"
-                  v-model="form.name"
+                  v-model="form.fullname"
                   :state="errors[0] ? false : (valid ? true : null)"
-                  placeholder="Enter Name"
+                  placeholder="Fullname"
                 ></b-form-input>
                 <b-form-invalid-feedback id="inputLiveFeedback">{{ errors[0] }}</b-form-invalid-feedback>
               </b-form-group>
@@ -91,7 +91,7 @@ export default {
   },
   data() {
     return {
-      form: { name, username: "", password: "", repassword: "" }
+      form: { fullname: "", username: "", password: "", repassword: "" }
     };
   },
   computed: {
@@ -106,7 +106,7 @@ export default {
       this.register(this.form);
     },
     onReset() {
-      this.form.name = "";
+      this.form.fullname = "";
       this.form.username = "";
       this.form.password = "";
       this.form.repassword = "";

@@ -27,7 +27,7 @@ async function login(username, password) {
 async function register(user) {
   let response = await axios.post(`${process.env.VUE_APP_API_BACKEND}/auth/register`, {
     username: user.username,
-    name: user.name,
+    fullname: user.fullname,
     password: user.password
   });
   return handleResponse(response);
@@ -35,6 +35,7 @@ async function register(user) {
 
 async function logout() {
   await localStorage.removeItem('user');
+  location.reload(true);
 }
 
 async function handleResponse(response) {

@@ -103,6 +103,29 @@ export const router = new Router({
     },
     {
       path: '/',
+      redirect: 'student',
+      name: 'student',
+      component: AcademyLayout,
+      children: [
+        {
+          path: '/student',
+          name: 'studentPage',
+          component: () => import('./views/student/Dashboard.vue')
+        },
+        {
+          path: '/student/mysubjects',
+          name: 'student-mysubjects',
+          component: () => import('./views/student/MySubjects')
+        },
+        {
+          path: '/student/mycertificates',
+          name: 'student-mycertificates',
+          component: () => import('./views/student/MyCertificates')
+        }
+      ]
+    },
+    {
+      path: '/',
       redirect: 'login',
       component: AuthLayout,
       children: [
@@ -143,11 +166,18 @@ router.beforeEach((to, from, next) => {
     if (to.matched[1].parent.name === 'academy' && user.role === 1) {
       return next();
     }
+    if (to.matched[1].parent.name === 'student' && user.role === 4) {
+      return next();
+    }
     return next('/403');
   } else if (afterlogin && loggedIn) {
     if (user.role === 1) {
       return next('/academy');
     }
+    if (user.role === 4) {
+      return next('/student');
+    }
+    next();
   }
   next();
 });
