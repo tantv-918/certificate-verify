@@ -7,68 +7,8 @@ const Certificate = require('../models/Certificate');
 const uuidv4 = require('uuid/v4');
 require('dotenv').config();
 
-router.get('/create', checkJWT, async (req, res) => {
-  if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-    res.json({
-      success: false,
-      msg: 'Failed'
-    });
-  } else {
-    res.json({
-      hello: 'new teacher'
-    });
-  }
-});
-
-router.post(
-  '/create',
-  checkJWT,
-  //[check('subjectid').isLength({ min: 6 }), check('username').isLength({ min: 6 })],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
-    }
-    if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-      res.json({
-        success: false,
-        msg: 'Failed'
-      });
-    } else {
-      const networkObj = await network.connectToNetwork(req.decoded.user);
-
-      var today = new Date();
-      var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-      var time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
-      var issueDate = date + ' ' + time;
-
-      let certificate = {
-        certificateID: uuidv4(),
-        subjectID: req.body.subjectid,
-        studentUsername: req.body.username,
-        issueDate: issueDate
-      };
-
-      const response = await network.createCertificate(networkObj, certificate);
-
-      if (response.success == true) {
-        res.json({
-          success: true,
-          msg: response.msg.toString()
-        });
-      } else {
-        res.json({
-          success: false,
-          msg: response.msg.toString()
-        });
-      }
-    }
-  }
-);
-
-router.get('/:certid', async (req, res) => {
-  var certid = req.params.certid;
-  await Certificate.findOne({ certificateID: certid }, async (err, ceritificate) => {
+router.get('/all', async (req, res) => {
+  await Certificate.find(async (err, ceritificates) => {
     if (err) {
       res.json({
         success: false,
@@ -83,8 +23,63 @@ router.get('/:certid', async (req, res) => {
   });
 });
 
-router.get('/all', async (req, res) => {
-  await Certificate.find(async (err, ceritificates) => {
+router.get('/create', checkJWT, async (req, res) => {
+  if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
+    res.json({
+      success: false,
+      msg: 'Failed'
+    });
+  } else {
+    res.json({
+      hello: 'new teacher'
+    });
+  }
+});
+
+router.post('/create', checkJWT, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+  if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
+    res.json({
+      success: false,
+      msg: 'Failed'
+    });
+  } else {
+    const networkObj = await network.connectToNetwork(req.decoded.user);
+
+    let today = new Date();
+    let date = `${today.getFullYear()} - ${today.getMonth() + 1} - ${today.getDate()}`;
+    let time = `${today.getHours()} : ${today.getMinutes()} : ${today.getSeconds()}`;
+    let issueDate = `${date} ${time}`;
+
+    let certificate = {
+      certificateID: uuidv4(),
+      subjectID: req.body.subjectid,
+      studentUsername: req.body.username,
+      issueDate: issueDate
+    };
+
+    const response = await network.createCertificate(networkObj, certificate);
+
+    if (response.success == true) {
+      res.json({
+        success: true,
+        msg: response.msg.toString()
+      });
+    } else {
+      res.json({
+        success: false,
+        msg: response.msg.toString()
+      });
+    }
+  }
+});
+
+router.get('/:certid', async (req, res) => {
+  let certid = req.params.certid;
+  Certificate.findOne({ certificateID: certid }, async (err, ceritificate) => {
     if (err) {
       res.json({
         success: false,

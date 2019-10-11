@@ -9,20 +9,24 @@ const network = require('../fabric/network');
 const test = require('sinon-test')(sinon, { useFakeTimers: false });
 
 const app = require('../app');
+require('dotenv').config();
 
-describe('Route /teacher', () => {
-  describe('#POST /teacher/create', () => {
+describe('Route /account/teacher', () => {
+  describe('#POST /account/teacher/create', () => {
     let findOneUserStub;
     let saveUserStub;
     let registerTeacherStub;
+    let connect;
 
     beforeEach(() => {
+      connect = sinon.stub(network, 'connectToNetwork');
       findOneUserStub = sinon.stub(User, 'findOne');
       saveUserStub = sinon.stub(User.prototype, 'save');
       registerTeacherStub = sinon.stub(network, 'registerTeacherOnBlockchain');
     });
 
     afterEach(() => {
+      connect.restore();
       findOneUserStub.restore();
       saveUserStub.restore();
       registerTeacherStub.restore();
@@ -30,37 +34,34 @@ describe('Route /teacher', () => {
 
     it('should be invalid if username and name is empty', (done) => {
       request(app)
-        .post('/teacher/create')
-        .set(
-          'authorization',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjVkOWQ3MDEzOGUzZTA3NDJkN2Y3MWE5NiIsInVzZXJuYW1lIjoiYWRtaW5hY2FkZW15IiwicGFzc3dvcmQiOiIkMmEkMTAkL0EzMElGVC5yUTNPNWQ3MlNvMU45dWFTSEhpdGp4MWRIYm80ZlYxYnNtdTlzUktmMXl0YW0iLCJyb2xlIjoxLCJfX3YiOjB9LCJpYXQiOjE1NzA1OTg5NzZ9.wgo4M3881WRudU4YTGtThJvUIduisO5YGXPkT940qCQ'
-        )
+        .post('/account/teacher/create')
+        .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .send({
           username: '',
           fullname: ''
         })
         .then((res) => {
-          expect(res.status).equal(422);
-          expect(res.body.errors[0].msg).equal('Invalid value');
+          expect(res.body.success).equal(false);
+          expect(res.body.status).equal(422);
           done();
         });
     });
 
     it('should create success', (done) => {
       findOneUserStub.yields(undefined, null);
+      connect.returns({ error: null });
+      registerTeacherStub.returns({ success: true, msg: 'success create teacher' });
 
       request(app)
-        .post('/teacher/create')
-        .set(
-          'authorization',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjVkOWQ3MDEzOGUzZTA3NDJkN2Y3MWE5NiIsInVzZXJuYW1lIjoiYWRtaW5hY2FkZW15IiwicGFzc3dvcmQiOiIkMmEkMTAkL0EzMElGVC5yUTNPNWQ3MlNvMU45dWFTSEhpdGp4MWRIYm80ZlYxYnNtdTlzUktmMXl0YW0iLCJyb2xlIjoxLCJfX3YiOjB9LCJpYXQiOjE1NzA1OTg5NzZ9.wgo4M3881WRudU4YTGtThJvUIduisO5YGXPkT940qCQ'
-        )
+        .post('/account/teacher/create')
+        .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .send({
           username: 'thienthangaycanh',
-          fullname: 'thien than gay canh'
+          fullname: 'Tan Trinh'
         })
         .then((res) => {
           expect(res.status).equal(200);
+          expect(res.body.success).equal(true);
           done();
         });
     });
@@ -68,18 +69,15 @@ describe('Route /teacher', () => {
     it('should fail because the username already exists.', (done) => {
       findOneUserStub.yields(undefined, {
         username: 'thienthangaycanh',
-        name: 'thien than gay canh'
+        fullname: 'Tan Trinh'
       });
 
       request(app)
-        .post('/teacher/create')
-        .set(
-          'authorization',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjoxfSwiaWF0IjoxNTcwMTYwNDExfQ.xtzWBCZf0-tJWaVQocE15oeGpiVCMPwdBWxhPMYxWW4'
-        )
+        .post('/account/teacher/create')
+        .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .send({
           username: 'thienthangaycanh',
-          fullname: 'thien than gay canh'
+          fullname: 'Tan Trinh'
         })
         .then((res) => {
           expect(res.status).equal(409);
@@ -87,89 +85,130 @@ describe('Route /teacher', () => {
         });
     });
   });
+
   describe('#GET /all', () => {
-    var allUserStub;
+    let connect;
+    let query;
+    let findOneUserStub;
+    let allUserStub;
 
     beforeEach(() => {
+      connect = sinon.stub(network, 'connectToNetwork');
+      query = sinon.stub(network, 'query');
+      findOneUserStub = sinon.stub(User, 'findOne');
       allUserStub = sinon.stub(User, 'find');
+
+      query.withArgs('GetAllTeachers');
     });
 
     afterEach(() => {
+      connect.restore();
+      query.restore();
       allUserStub.restore();
+      findOneUserStub.restore();
     });
 
     it('should return all teachers.', (done) => {
-      allUserStub.yields(undefined, [
-        {
-          id: 1,
-          username: 'GV01',
-          role: USER_ROLES.TEACHER
-        },
-        {
-          id: 2,
-          username: 'GV02',
-          role: USER_ROLES.TEACHER
-        },
-        {
-          id: 3,
-          username: 'GV03',
-          role: USER_ROLES.TEACHER
-        }
-      ]);
+      query.returns({
+        success: true,
+        msg: [
+          {
+            id: 1,
+            username: 'GV01',
+            role: USER_ROLES.TEACHER
+          },
+          {
+            id: 2,
+            username: 'GV02',
+            role: USER_ROLES.TEACHER
+          },
+          {
+            id: 3,
+            username: 'GV03',
+            role: USER_ROLES.TEACHER
+          }
+        ]
+      });
 
       request(app)
-        .get('/teacher/all')
-        .set(
-          'authorization',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjVkOWQ3MDEzOGUzZTA3NDJkN2Y3MWE5NiIsInVzZXJuYW1lIjoiYWRtaW5hY2FkZW15IiwicGFzc3dvcmQiOiIkMmEkMTAkL0EzMElGVC5yUTNPNWQ3MlNvMU45dWFTSEhpdGp4MWRIYm80ZlYxYnNtdTlzUktmMXl0YW0iLCJyb2xlIjoxLCJfX3YiOjB9LCJpYXQiOjE1NzA1OTg5NzZ9.wgo4M3881WRudU4YTGtThJvUIduisO5YGXPkT940qCQ'
-        )
+        .get('/account/teacher/all')
+        .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
-          //console.log(res.body)
+          expect(res.status).equal(200);
           expect(res.body.success).equal(true);
-          expect(res.body.teachers.length).eql(3);
+          done();
+        });
+    });
+
+    it('fail return all teachers.', (done) => {
+      query.returns({
+        success: false,
+        msg: 'ERROR'
+      });
+
+      request(app)
+        .get('/account/teacher/all')
+        .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+        .then((res) => {
+          expect(res.status).equal(200);
+          expect(res.body.success).equal(false);
           done();
         });
     });
   });
 });
 
-describe('#POST /teacher/score', () => {
+describe('#POST /account/teacher/score', () => {
   let connect;
-  let query;
+  let createScore;
 
   beforeEach(() => {
     connect = sinon.stub(network, 'connectToNetwork');
-    query = sinon.stub(network, 'query');
-
-    query.withArgs('QueryStudent', '20156425');
+    createScore = sinon.stub(network, 'createScore');
   });
 
   afterEach(() => {
     connect.restore();
-    query.restore();
+    createScore.restore();
   });
 
   it(
     'success create score with role teacher',
     test((done) => {
       connect.returns({ error: null });
+      createScore.returns({ success: true, msg: 'Create success' });
       request(app)
-        .post('/teacher/score')
-        .set(
-          'authorization',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjoyfSwiaWF0IjoxNTcwNDMxNDM2fQ.UHMvFI3zHDFncCr6ZodNjSZsPhji3ut2Z583iYLa6fs'
-        )
+        .post('/account/teacher/score')
+        .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
         .send({
           subjectid: '02',
           studentusername: 'tan',
           score: 9.5
         })
-        .expect(200)
-        .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
+        .then((res) => {
+          expect(res.status).equal(200);
+          expect(res.body.success).equal(true);
+          done();
+        });
+    })
+  );
+
+  it(
+    'fail create score with role teacher',
+    test((done) => {
+      connect.returns({ error: null });
+      createScore.returns({ success: false, msg: 'Error' });
+      request(app)
+        .post('/account/teacher/score')
+        .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
+        .send({
+          subjectid: '02',
+          studentusername: 'tan',
+          score: 9.5
+        })
+        .then((res) => {
+          expect(res.status).equal(200);
+          expect(res.body.success).equal(false);
           done();
         });
     })
@@ -180,22 +219,16 @@ describe('#POST /teacher/score', () => {
     test((done) => {
       connect.returns({ error: null });
       request(app)
-        .post('/teacher/score')
-        .set(
-          'authorization',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjoyfSwiaWF0IjoxNTcwNDMxNDM2fQ.UHMvFI3zHDFncCr6ZodNjSZsPhji3ut2Z583iYLa6fs'
-        )
+        .post('/account/teacher/score')
+        .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
         .send({
           subjectid: '02',
           studentusername: 'tan',
           score: '<script>alert("hacked");</script>'
         })
-        .expect(422)
-        .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
+        .then((res) => {
+          expect(res.body.success).equal(false);
+          expect(res.body.status).equal(422);
           done();
         });
     })
@@ -206,22 +239,16 @@ describe('#POST /teacher/score', () => {
     test((done) => {
       connect.returns({ error: null });
       request(app)
-        .post('/teacher/score')
-        .set(
-          'authorization',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjoyfSwiaWF0IjoxNTcwNDMxNDM2fQ.UHMvFI3zHDFncCr6ZodNjSZsPhji3ut2Z583iYLa6fs'
-        )
+        .post('/account/teacher/score')
+        .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
         .send({
           subjectid: '02',
           studentusername: '',
           score: ''
         })
-        .expect(422)
-        .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
+        .then((res) => {
+          expect(res.body.success).equal(false);
+          expect(res.body.status).equal(422);
           done();
         });
     })
@@ -232,22 +259,16 @@ describe('#POST /teacher/score', () => {
     test((done) => {
       connect.returns({ error: null });
       request(app)
-        .post('/teacher/score')
-        .set(
-          'authorization',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjoxfSwiaWF0IjoxNTcwMTYwNDExfQ.xtzWBCZf0-tJWaVQocE15oeGpiVCMPwdBWxhPMYxWW4'
-        )
+        .post('/account/teacher/score')
+        .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .send({
           subjectid: '02',
           studentusername: 'tan',
           score: 10
         })
-        .expect(403)
-        .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
+        .then((res) => {
+          expect(res.body.success).equal(false);
+          expect(res.body.status).equal(403);
           done();
         });
     })
@@ -258,22 +279,16 @@ describe('#POST /teacher/score', () => {
     test((done) => {
       connect.returns({ error: null });
       request(app)
-        .post('/teacher/score')
-        .set(
-          'authorization',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjozfSwiaWF0IjoxNTcwNDMxNjA0fQ.z_wj2Vbj6O7sw4n9Jk6QpcUUHnAnYXULScCZSe7c5Zg'
-        )
+        .post('/account/teacher/score')
+        .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
         .send({
           subjectid: '02',
           studentusername: 'tantv',
           score: 10.0
         })
-        .expect(403)
-        .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
+        .then((res) => {
+          expect(res.body.success).equal(false);
+          expect(res.body.status).equal(403);
           done();
         });
     })

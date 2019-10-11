@@ -3,6 +3,8 @@ process.env.NODE_DEV = 'test';
 const expect = require('chai').expect;
 const request = require('supertest');
 const sinon = require('sinon');
+const User = require('../models/User');
+const USER_ROLES = require('../configs/constant').USER_ROLES;
 const network = require('../fabric/network');
 const test = require('sinon-test')(sinon, { useFakeTimers: false });
 
@@ -10,19 +12,16 @@ const app = require('../app');
 
 require('dotenv').config();
 
-// token of admin student: ...c5Zg
-// token of student: ...aQVk
-// token of admin academy: ...xWW4
-// token of teacher: ...a6fs
-
 describe('GET /account/student', () => {
   describe('GET /account/student/:username', () => {
     let connect;
     let query;
+    let findOneUserStub;
 
     beforeEach(() => {
       connect = sinon.stub(network, 'connectToNetwork');
       query = sinon.stub(network, 'query');
+      findOneUserStub = sinon.stub(User, 'findOne');
 
       query.withArgs('QueryStudent', 'hoangdd');
     });
@@ -30,16 +29,31 @@ describe('GET /account/student', () => {
     afterEach(() => {
       connect.restore();
       query.restore();
+      findOneUserStub.restore();
     });
 
     it(
-      'success query student id with admin',
+      'success query student id with admin student',
       test((done) => {
-        connect.returns({ error: null });
+        findOneUserStub.yields(undefined, {
+          username: 'hoangdd',
+          role: USER_ROLES.STUDENT
+        });
+
+        connect.returns({
+          contract: 'academy',
+          network: 'certificatechannel',
+          gateway: 'gateway',
+          user: { username: 'hoangdd', role: USER_ROLES.STUDENT }
+        });
+
         query.returns({
-          Username: 'hoangdd',
-          Fullname: 'Do Hoang',
-          Subjects: ['1', '2']
+          success: true,
+          msg: {
+            Username: 'hoangdd',
+            Fullname: 'Do Hoang',
+            Subjects: ['1', '2']
+          }
         });
         request(app)
           .get('/account/student/hoangdd')
@@ -53,14 +67,39 @@ describe('GET /account/student', () => {
     );
 
     it(
-      'fail connect to blockchain when query student id with admin',
+      'fail connect to blockchain when query student ',
       test((done) => {
+        findOneUserStub.yields(undefined, {
+          username: 'hoangdd',
+          role: USER_ROLES.STUDENT
+        });
+
+        connect.returns(null);
+
         query.returns({
           success: false,
-          msg: 'ERR'
+          msg: 'error'
         });
+
         request(app)
-          .get('/account/student/20156425')
+          .get('/account/student/hoangdd')
+          .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
+          .then((res) => {
+            expect(res.body.success).equal(false);
+            expect(res.body.msg).equal('Failed connect to blockchain');
+            done();
+          });
+      })
+    );
+
+    it(
+      'do not exist student id',
+      test((done) => {
+        findOneUserStub.yields({ error: 'student do not exists' }, undefined);
+        connect.returns({ error: null });
+        query.returns({ success: false, msg: 'student do not exists' });
+        request(app)
+          .get('/account/student/vodanh')
           .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
           .then((res) => {
             expect(res.body.success).equal(false);
@@ -70,48 +109,34 @@ describe('GET /account/student', () => {
     );
 
     it(
-      'do not exist student id',
+      'sucess query student with student',
       test((done) => {
-        connect.returns({ error: null });
-        query.returns(null);
-        request(app)
-          .get('/student/20156425')
-          .set(
-            'authorization',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjoxfSwiaWF0IjoxNTcwMTYwNDExfQ.xtzWBCZf0-tJWaVQocE15oeGpiVCMPwdBWxhPMYxWW4'
-          )
-          .expect(404)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
-            done();
-          });
-      })
-    );
-
-    it(
-      'sucess query student id with user',
-      test((done) => {
-        connect.returns({ error: null });
-        query.returns({
-          Username: '20156425',
-          Fullname: 'Trinh Van Tan',
-          Address: '38 Hoang Mai',
-          PhoneNumber: '0382794668'
+        findOneUserStub.yields(undefined, {
+          username: 'tantv',
+          role: USER_ROLES.STUDENT
         });
+
+        connect.returns({
+          contract: 'academy',
+          network: 'certificatechannel',
+          gateway: 'gateway',
+          user: { username: 'tantv', role: USER_ROLES.STUDENT }
+        });
+
+        query.returns({
+          success: true,
+          msg: {
+            Username: 'tantv',
+            Fullname: 'Tan Bong Cuoi',
+            Subjects: ['1', '2']
+          }
+        });
+
         request(app)
-          .get('/student/20156425')
-          .set(
-            'authorization',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjo0fSwiaWF0IjoxNTcwNDMwNzc0fQ.yFZGWt9O605DvZsPxRLDeTqgKi3y1wusXw7hiIUaQVk'
-          )
-          .expect(200)
-          .expect('Content-Type', /json/)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .get('/account/student/tantv')
+          .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
+          .then((res) => {
+            expect(res.body.success).equal(true);
             done();
           });
       })
@@ -121,7 +146,6 @@ describe('GET /account/student', () => {
   describe('GET /student/all', () => {
     let connect;
     let query;
-    let allStudent;
 
     beforeEach(() => {
       connect = sinon.stub(network, 'connectToNetwork');
@@ -139,32 +163,25 @@ describe('GET /account/student', () => {
       'success query all student with admin student',
       test((done) => {
         connect.returns({ error: null });
-        query.returns(
-          {
-            Username: '20161010',
-            Fullname: 'Tan Bong Cuoi',
-            Address: '144 Xuan Thuy',
-            PhoneNumber: '0322794668'
-          },
-          {
-            Username: '20156425',
-            Fullname: 'Trinh Van Tan',
-            Address: '38 Hoang Mai',
-            PhoneNumber: '0382794668'
-          }
-        );
-        request(app)
-          .get('/student/all')
-          .set(
-            'authorization',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjozfSwiaWF0IjoxNTcwNDMxNjA0fQ.z_wj2Vbj6O7sw4n9Jk6QpcUUHnAnYXULScCZSe7c5Zg'
-          )
-          .expect(200)
-          .expect('Content-Type', /json/)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
+        query.returns({
+          success: true,
+          msg: [
+            {
+              Username: '20161010',
+              Fullname: 'Tan Bong Cuoi'
+            },
+            {
+              Username: '20156425',
+              Fullname: 'Trinh Van Tan'
             }
+          ]
+        });
+        request(app)
+          .get('/account/student/all')
+          .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
+          .then((res) => {
+            expect(res.status).equal(200);
+            expect(res.body.success).equal(true);
             done();
           });
       })
@@ -174,32 +191,25 @@ describe('GET /account/student', () => {
       'success query all student with admin academy',
       test((done) => {
         connect.returns({ error: null });
-        query.returns(
-          {
-            Username: '20161010',
-            Fullname: 'Tan Bong Cuoi',
-            Address: '144 Xuan Thuy',
-            PhoneNumber: '0322794668'
-          },
-          {
-            Username: '20156425',
-            Fullname: 'Trinh Van Tan',
-            Address: '38 Hoang Mai',
-            PhoneNumber: '0382794668'
-          }
-        );
-        request(app)
-          .get('/student/all')
-          .set(
-            'authorization',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjoxfSwiaWF0IjoxNTcwMTYwNDExfQ.xtzWBCZf0-tJWaVQocE15oeGpiVCMPwdBWxhPMYxWW4'
-          )
-          .expect(200)
-          .expect('Content-Type', /json/)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
+        query.returns({
+          success: true,
+          msg: [
+            {
+              Username: '20161010',
+              Fullname: 'Tan Bong Cuoi'
+            },
+            {
+              Username: '20156425',
+              Fullname: 'Trinh Van Tan'
             }
+          ]
+        });
+        request(app)
+          .get('/account/student/all')
+          .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+          .then((res) => {
+            expect(res.status).equal(200);
+            expect(res.body.success).equal(true);
             done();
           });
       })
@@ -209,51 +219,25 @@ describe('GET /account/student', () => {
       'success query all student with teacher',
       test((done) => {
         connect.returns({ error: null });
-        query.returns(
-          {
-            Username: '20161010',
-            Fullname: 'Tan Bong Cuoi',
-            Address: '144 Xuan Thuy',
-            PhoneNumber: '0322794668'
-          },
-          {
-            Username: '20156425',
-            Fullname: 'Trinh Van Tan',
-            Address: '38 Hoang Mai',
-            PhoneNumber: '0382794668'
-          }
-        );
-        request(app)
-          .get('/student/all')
-          .set(
-            'authorization',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjoyfSwiaWF0IjoxNTcwNDMxNDM2fQ.UHMvFI3zHDFncCr6ZodNjSZsPhji3ut2Z583iYLa6fs'
-          )
-          .expect(200)
-          .expect('Content-Type', /json/)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
+        query.returns({
+          success: true,
+          msg: [
+            {
+              Username: '20161010',
+              Fullname: 'Tan Bong Cuoi'
+            },
+            {
+              Username: '20156425',
+              Fullname: 'Trinh Van Tan'
             }
-            done();
-          });
-      })
-    );
-
-    it(
-      'unauthorized query all students with student',
-      test((done) => {
+          ]
+        });
         request(app)
-          .get('/student/all')
-          .set(
-            'authorization',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjo0fSwiaWF0IjoxNTcwNDMwNzc0fQ.yFZGWt9O605DvZsPxRLDeTqgKi3y1wusXw7hiIUaQVk'
-          )
-          .expect(403)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .get('/account/student/all')
+          .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
+          .then((res) => {
+            expect(res.status).equal(200);
+            expect(res.body.success).equal(true);
             done();
           });
       })

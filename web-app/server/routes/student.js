@@ -5,15 +5,15 @@ const { validationResult, sanitizeParam, check } = require('express-validator');
 const User = require('../models/User');
 
 router.get('/all', async (req, res) => {
-  // if (req.decoded.user.role === USER_ROLES.STUDENT) {
-  //   res.status(403).json({
-  //     success: false,
-  //     msg: 'Failed',
-  //     status: '403'
-  //   });
-  // }
-
   const networkObj = await network.connectToNetwork(req.decoded.user);
+
+  if (!networkObj) {
+    res.json({
+      success: false,
+      msg: 'Failed connect to blockchain',
+      status: 500
+    });
+  }
 
   const response = await network.query(networkObj, 'GetAllStudents');
 
@@ -28,14 +28,11 @@ router.get('/all', async (req, res) => {
       msg: response.msg
     });
   }
+
+  res.status(200).send({ success: true });
 });
 
-router.get('/:username', async (req, res, next) => {
-  const result = validationResult(req);
-  if (!result.isEmpty()) {
-    return res.status(422).json({ errors: result.array(), status: '422' });
-  }
-
+router.get('/:username', async (req, res) => {
   var username = req.params.username;
 
   User.findOne({ username: username, role: USER_ROLES.STUDENT }, async (err, student) => {
@@ -46,24 +43,26 @@ router.get('/:username', async (req, res, next) => {
       });
     } else {
       const networkObj = await network.connectToNetwork(req.decoded.user);
+
+      if (!networkObj) {
+        res.json({
+          success: false,
+          msg: 'Failed connect to blockchain',
+          status: 500
+        });
+      }
+
       const response = await network.query(networkObj, 'QueryStudent', username);
-      if (response.success == true) {
-        if (!response.msg) {
-          res.json({
-            success: false,
-            msg: 'NOT FOUND',
-            status: 404
-          });
-        } else {
-          res.json({
-            success: true,
-            msg: response.msg
-          });
-        }
-      } else {
+
+      if (!response.success) {
         res.json({
           success: false,
           msg: response.msg
+        });
+      } else {
+        res.json({
+          success: true,
+          subjects: response.msg
         });
       }
     }

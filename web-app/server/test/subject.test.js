@@ -8,6 +8,7 @@ const User = require('../models/User');
 const test = require('sinon-test')(sinon, { useFakeTimers: false });
 
 const app = require('../app');
+require('dotenv').config();
 
 describe('Routes /subject/create', () => {
   describe('#GET /subject/create', () => {
@@ -16,16 +17,9 @@ describe('Routes /subject/create', () => {
       test((done) => {
         request(app)
           .get('/subject/create')
-          .set(
-            'authorization',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjoxfSwiaWF0IjoxNTcwMTYwNDExfQ.xtzWBCZf0-tJWaVQocE15oeGpiVCMPwdBWxhPMYxWW4'
-          )
-          .expect(200)
-          .expect('Content-Type', /json/)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+          .then((res) => {
+            expect(res.body.success).equal(true);
             done();
           });
       })
@@ -36,16 +30,11 @@ describe('Routes /subject/create', () => {
       test((done) => {
         request(app)
           .get('/subject/create')
-          .set(
-            'authorization',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjo0fSwiaWF0IjoxNTcwNDMwNzc0fQ.yFZGWt9O605DvZsPxRLDeTqgKi3y1wusXw7hiIUaQVk'
-          )
-          .expect(403)
-          .expect('Content-Type', /json/)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
+          .then((res) => {
+            expect(res.body.success).equal(false);
+            expect(res.body.msg).equal('Permission Denied');
+            expect(res.body.status).equal(403);
             done();
           });
       })
@@ -56,16 +45,11 @@ describe('Routes /subject/create', () => {
       test((done) => {
         request(app)
           .get('/subject/create')
-          .set(
-            'authorization',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjoyfSwiaWF0IjoxNTcwNDMxNDM2fQ.UHMvFI3zHDFncCr6ZodNjSZsPhji3ut2Z583iYLa6fs'
-          )
-          .expect(403)
-          .expect('Content-Type', /json/)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
+          .then((res) => {
+            expect(res.body.success).equal(false);
+            expect(res.body.msg).equal('Permission Denied');
+            expect(res.body.status).equal(403);
             done();
           });
       })
@@ -76,16 +60,11 @@ describe('Routes /subject/create', () => {
       test((done) => {
         request(app)
           .get('/subject/create')
-          .set(
-            'authorization',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjozfSwiaWF0IjoxNTcwNDMxNjA0fQ.z_wj2Vbj6O7sw4n9Jk6QpcUUHnAnYXULScCZSe7c5Zg'
-          )
-          .expect(403)
-          .expect('Content-Type', /json/)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
+          .then((res) => {
+            expect(res.body.success).equal(false);
+            expect(res.body.msg).equal('Permission Denied');
+            expect(res.body.status).equal(403);
             done();
           });
       })
@@ -94,17 +73,19 @@ describe('Routes /subject/create', () => {
 
   describe('#POST /subject/create', () => {
     let connect;
-    let query;
-    let createSubject;
+    let createSubjectStub;
+    let findOneUserStub;
 
     beforeEach(() => {
       connect = sinon.stub(network, 'connectToNetwork');
-      createSubject = sinon.stub(network, 'createSubject');
+      createSubjectStub = sinon.stub(network, 'createSubject');
+      findOneUserStub = sinon.stub(User, 'findOne');
     });
 
     afterEach(() => {
       connect.restore();
-      createSubject.restore();
+      createSubjectStub.restore();
+      findOneUserStub.restore();
     });
 
     it(
@@ -112,19 +93,13 @@ describe('Routes /subject/create', () => {
       test((done) => {
         request(app)
           .post('/subject/create')
-          .set(
-            'authorization',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjoxfSwiaWF0IjoxNTcwMTYwNDExfQ.xtzWBCZf0-tJWaVQocE15oeGpiVCMPwdBWxhPMYxWW4'
-          )
+          .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
           .send({
-            subjectName: ''
+            subjectname: ''
           })
-          .expect(422)
-          .expect('Content-Type', /json/)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
+          .then((res) => {
+            expect(res.body.success).equal(false);
+            expect(res.body.status).equal(422);
             done();
           });
       })
@@ -134,17 +109,50 @@ describe('Routes /subject/create', () => {
       'should create subject success',
       test((done) => {
         connect.returns({ error: null });
+        createSubjectStub.returns({ success: true, msg: 'subject is created' });
         request(app)
           .post('/subject/create')
-          .set(
-            'authorization',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjoxfSwiaWF0IjoxNTcwMTYwNDExfQ.xtzWBCZf0-tJWaVQocE15oeGpiVCMPwdBWxhPMYxWW4'
-          )
+          .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
           .send({
             subjectname: 'Hyperledger Fabric'
           })
           .then((res) => {
-            expect(200);
+            expect(res.body.success).equal(true);
+            done();
+          });
+      })
+    );
+
+    it(
+      'fail create subject because error connect to blockchain',
+      test((done) => {
+        connect.returns(null);
+        request(app)
+          .post('/subject/create')
+          .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+          .send({
+            subjectname: 'Hyperledger Fabric'
+          })
+          .then((res) => {
+            expect(res.body.success).equal(false);
+            expect(res.body.status).equal(500);
+            done();
+          });
+      })
+    );
+
+    it(
+      'fail create subject because error call to chaincode',
+      test((done) => {
+        createSubjectStub.returns({ success: false, msg: 'error' });
+        request(app)
+          .post('/subject/create')
+          .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+          .send({
+            subjectname: 'Hyperledger Fabric'
+          })
+          .then((res) => {
+            expect(res.body.success).equal(false);
             done();
           });
       })
@@ -171,22 +179,30 @@ describe('#GET /subject/all', () => {
     'should return all subjects',
     test((done) => {
       connect.returns({ error: null });
-      query.returns(
-        { SubjectID: '00', Name: 'Blockchain', TeacherUsername: 'GV00' },
-        { SubjectID: '01', Name: 'Sawtooth', TeacherUsername: 'GV01' }
-      );
+      query.returns({
+        success: true,
+        msg: [
+          {
+            SubjectID: '00',
+            Name: 'Blockchain',
+            TeacherUsername: 'GV00',
+            Students: ['Tan', 'Nghia']
+          },
+          {
+            SubjectID: '01',
+            Name: 'Sawtooth',
+            TeacherUsername: 'GV01',
+            Students: ['Tan', 'Nghia', 'Quang']
+          }
+        ]
+      });
       request(app)
         .get('/subject/all')
-        .set(
-          'authorization',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjo0fSwiaWF0IjoxNTcwNDMwNzc0fQ.yFZGWt9O605DvZsPxRLDeTqgKi3y1wusXw7hiIUaQVk'
-        )
+        .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
         .expect(200)
-        .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
+        .then((res) => {
+          expect(res.status).equal(200);
+          expect(res.body.success).equal(true);
           done();
         });
     })
@@ -195,19 +211,14 @@ describe('#GET /subject/all', () => {
   it(
     'fail get all subjects because err connect to blockchain',
     test((done) => {
-      connect.returns({ error: 'Error' });
+      connect.returns(null);
       request(app)
         .get('/subject/all')
-        .set(
-          'authorization',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjo0fSwiaWF0IjoxNTcwNDMwNzc0fQ.yFZGWt9O605DvZsPxRLDeTqgKi3y1wusXw7hiIUaQVk'
-        )
-        .expect(500)
-        .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
+        .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
+        .then((res) => {
+          expect(res.body.success).equal(false);
+          expect(res.body.status).equal(500);
+          expect(res.body.msg).equal('Failed to connect blockchain');
           done();
         });
     })
@@ -233,33 +244,29 @@ describe('#GET /subject/:id', () => {
     'should return subject',
     test((done) => {
       connect.returns({ error: null });
-      query.returns({ SubjectID: '00', Name: 'Blockchain', TeacherUsername: 'GV00' });
+      query.returns({
+        success: true,
+        msg: { SubjectID: '00', Name: 'Blockchain', TeacherUsername: 'GV00' }
+      });
       request(app)
         .get('/subject/00')
-        .set(
-          'authorization',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjo0fSwiaWF0IjoxNTcwNDMwNzc0fQ.yFZGWt9O605DvZsPxRLDeTqgKi3y1wusXw7hiIUaQVk'
-        )
+        .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
         .then((res) => {
-          expect(200);
+          expect(res.body.success).equal(true);
           done();
         });
     })
   );
 
   it(
-    'subject does not exist in ledger ',
+    'fail query subject because call chaincode error ',
     test((done) => {
       connect.returns({ error: null });
-      query.returns(null);
+      query.returns({ success: false, msg: 'err' });
       request(app)
-        .get('/subject/00')
-        .set(
-          'authorization',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoiaG9hbmdkZCIsInBhc3N3b3JkIjoiJDJhJDEwJGhxWnRJd0ZjbDhTTGFVYnhrdVBPRWVLcXZUa25XRm9kalZhWVZkWG9aMEVlSWIzU2pUL2RHIiwibmFtZSI6ImFsaWJhYmEiLCJyb2xlIjo0fSwiaWF0IjoxNTcwNDMwNzc0fQ.yFZGWt9O605DvZsPxRLDeTqgKi3y1wusXw7hiIUaQVk'
-        )
+        .get('/subject/fabric')
         .then((res) => {
-          expect(404);
+          expect(res.body.success).equal(false);
           done();
         });
     })

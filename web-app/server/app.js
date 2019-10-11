@@ -71,14 +71,12 @@ app.use(
 // Set up routes
 app.use('/auth', authRoutes);
 app.use('/certificate', certificateRoutes);
-app.use('/subject', subjectRoutes);
+app.use('/subject', checkJWT, subjectRoutes);
 app.use('/score', scoreRoutes);
 app.use('/account/student', checkJWT, studentRoutes);
 app.use('/account/teacher', checkJWT, teacherRoutes);
 app.use('/subject', checkJWT, subjectRoutes);
 app.use('/account/me', checkJWT, meRoutes);
-
-//app.use('/cert', certRouter);
 
 app.get('/', (req, res, next) => {
   res.json({ title: 'Hello' });

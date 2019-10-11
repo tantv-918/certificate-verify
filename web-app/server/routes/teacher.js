@@ -26,12 +26,16 @@ router.post(
       .trim()
       .escape(),
 
-    check('fullname').isLength({ min: 6 })
+    check('fullname')
+      .not()
+      .isEmpty()
+      .trim()
+      .escape()
   ],
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
+      return res.json({ success: false, errors: errors.array(), status: 422 });
     }
 
     if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
@@ -54,6 +58,14 @@ router.post(
             fullname: req.body.fullname
           };
           const networkObj = await network.connectToNetwork(req.decoded.user);
+
+          if (!networkObj) {
+            res.json({
+              success: false,
+              msg: 'Failed',
+              status: 500
+            });
+          }
           const response = await network.registerTeacherOnBlockchain(networkObj, createdUser);
           if (response.success == true) {
             res.json({
@@ -90,16 +102,17 @@ router.post(
     .not()
     .isEmpty()
     .isFloat(),
-  async (req, res, next) => {
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
+      return res.json({ success: false, errors: errors.array(), status: 422 });
     }
 
     if (req.decoded.user.role !== USER_ROLES.TEACHER) {
-      res.status(403).json({
+      res.json({
         success: false,
-        msg: 'Permission Denied'
+        msg: 'Permission Denied',
+        status: 403
       });
     } else {
       const user = req.decoded.user;
@@ -110,19 +123,21 @@ router.post(
 
       let networkObj = await network.connectToNetwork(user);
 
-      if (networkObj.error) {
-        res.status(500).json({
+      if (!networkObj) {
+        res.json({
           success: false,
-          msg: 'Failed'
+          msg: 'Failed',
+          status: 500
         });
       }
 
       let response = await network.createScore(networkObj, subjectid, studentusername, score);
 
-      if (!response) {
-        res.status(500).json({
+      if (!response.success) {
+        res.json({
           success: false,
-          msg: 'Error create score'
+          msg: 'Error create score',
+          status: 500
         });
       } else {
         res.json({
