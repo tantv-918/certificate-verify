@@ -22,7 +22,6 @@ router.get('/create', async (req, res) => {
 
 router.post(
   '/create',
-  checkJWT,
   [
     check('subjectname')
       .not()
@@ -30,10 +29,10 @@ router.post(
       .trim()
       .escape()
   ],
-  async (req, res, next) => {
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array(), status: '422' });
+      return res.json({ success: false, errors: errors.array(), status: 422 });
     }
 
     if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
@@ -178,7 +177,7 @@ router.get('/:subjectId', async (req, res, next) => {
     if (response.success) {
       return res.json({
         success: true,
-        msg: response.msg.toString()
+        msg: response.msg
       });
     }
     return res.json({
@@ -262,7 +261,7 @@ router.get('/:subjectId/certificates', checkJWT, async (req, res, next) => {
       }
       return res.json({
         success: false,
-        msg: response.msg.toString()
+        msg: response.msg
       });
     }
   });

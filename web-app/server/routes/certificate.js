@@ -7,6 +7,22 @@ const Certificate = require('../models/Certificate');
 const uuidv4 = require('uuid/v4');
 require('dotenv').config();
 
+router.get('/all', async (req, res) => {
+  await Certificate.find(async (err, ceritificates) => {
+    if (err) {
+      res.json({
+        success: false,
+        msg: err
+      });
+    } else {
+      res.json({
+        success: true,
+        msg: ceritificate
+      });
+    }
+  });
+});
+
 router.get('/create', checkJWT, async (req, res) => {
   if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
     res.json({
