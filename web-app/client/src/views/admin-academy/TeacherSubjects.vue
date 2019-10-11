@@ -64,9 +64,11 @@
         <template v-slot:first>
           <option :value="null" disabled>-- Chọn môn học --</option>
         </template>
-
-        <option value="1">Rails 01</option>
-        <option value="2">Java 02</option>
+        <option
+          v-for="subject in subjectsNoTeacher"
+          :value="subject.SubjectID"
+          :key="subject.SubjectID"
+        >{{subject.Name}}</option>
       </b-form-select>
     </b-modal>
   </div>
@@ -110,7 +112,7 @@ export default {
     };
   },
   computed: {
-    ...mapState("adminAcademy", ["subjectsOfTeacher"])
+    ...mapState("adminAcademy", ["subjectsOfTeacher", "subjectsNoTeacher"])
   },
   methods: {
     ...mapActions("adminAcademy", [
@@ -119,7 +121,10 @@ export default {
       "addSubjectOfTeacher"
     ]),
     handleAddSubject() {
-      this.addSubjectOfTeacher(this.newSubjectId);
+      let username = this.$route.params.id;
+      let newSubjectId = this.newSubjectId;
+      console.log(username, newSubjectId);
+      this.addSubjectOfTeacher({ username, subjectId: newSubjectId });
       this.newSubjectId = null;
     },
     deleteSubject(subjectId) {

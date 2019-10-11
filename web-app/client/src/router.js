@@ -126,6 +126,24 @@ export const router = new Router({
     },
     {
       path: '/',
+      redirect: 'teacher',
+      name: 'teacher',
+      component: AcademyLayout,
+      children: [
+        {
+          path: '/teacher',
+          name: 'teacherPage',
+          component: () => import('./views/teacher/Dashboard.vue')
+        },
+        {
+          path: '/teacher/:id/students',
+          name: 'teacher-subject-students',
+          component: () => import('./views/teacher/StudentsOfSubject.vue')
+        }
+      ]
+    },
+    {
+      path: '/',
       redirect: 'login',
       component: AuthLayout,
       children: [
@@ -166,6 +184,9 @@ router.beforeEach((to, from, next) => {
     if (to.matched[1].parent.name === 'academy' && user.role === 1) {
       return next();
     }
+    if (to.matched[1].parent.name === 'teacher' && user.role === 2) {
+      return next();
+    }
     if (to.matched[1].parent.name === 'student' && user.role === 4) {
       return next();
     }
@@ -173,6 +194,9 @@ router.beforeEach((to, from, next) => {
   } else if (afterlogin && loggedIn) {
     if (user.role === 1) {
       return next('/academy');
+    }
+    if (user.role === 2) {
+      return next('/teacher');
     }
     if (user.role === 4) {
       return next('/student');

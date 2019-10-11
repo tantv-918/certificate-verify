@@ -23,5 +23,5 @@ extend('min', {
 
 extend('min_value', {
   ...min_value,
-  message: 'This {_field_} must be 0 characters long'
+  message: 'This {_field_} must have a value greater than or equal to {min}'
 });

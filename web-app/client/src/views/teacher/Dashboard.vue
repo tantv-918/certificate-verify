@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="container-fluid">
-      <h1 class="h3 mb-2 text-gray-800">Danh Sách Môn Học Hiện Có</h1>
+      <h1 class="h3 mb-2 text-gray-800">Danh Sách Môn Học Đang Dạy</h1>
       <p class="mb-4 mt-4"></p>
       <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -24,31 +24,18 @@
               <template slot="delete" slot-scope="row">
                 <div class="row justify-content-center">
                   <b-button
-                    variant="primary"
-                    @click="handleRegisterSubject(row.item)"
-                    class="float-left btn-circle btn-sm"
-                    :id="`popover-confirm-${row.item.SubjectID}`"
-                    v-if="!row.item.statusConfirm || row.item.statusConfirm === 0 "
+                    variant="info"
+                    class="mr-1 btn-circle btn-sm"
+                    :to="`teacher/${row.item.SubjectID}/students`"
+                    :id="`popover-info-${row.item.SubjectID}`"
                   >
                     <b-popover
-                      :target="`popover-confirm-${row.item.SubjectID}`"
+                      :target="`popover-info-${row.item.SubjectID}`"
                       triggers="hover"
                       placement="top"
-                    >Đăng ký</b-popover>
-                    <i class="fas fa-check-circle"></i>
+                    >Chi Tiết</b-popover>
+                    <i class="fas fa-info-circle"></i>
                   </b-button>
-                  <b-button
-                    variant="info"
-                    v-if="row.item.statusConfirm === 1"
-                    disabled="disabled"
-                    class="btn-confirm-certificate"
-                  >Registered</b-button>
-                  <b-button
-                    variant="success"
-                    v-if="row.item.statusConfirm === 2"
-                    class="btn-confirm-certificate"
-                    :to="`/cert/1`"
-                  >Certificated</b-button>
                 </div>
               </template>
             </b-table>
@@ -136,37 +123,13 @@ export default {
     };
   },
   computed: {
-    ...mapState("student", ["listSubjects"]),
-    ...mapState({
-      user: state => state.account
-    })
+    ...mapState("teacher", ["listSubjects"])
   },
   methods: {
-    ...mapActions("student", ["getAllSubjects", "registerSubject"]),
-    handleRegisterSubject(subject) {
-      this.$swal({
-        title: "Are you sure?",
-        text: "After registration will wait list!",
-        type: "success",
-        showCancelButton: true,
-        cancelButtonColor: "#d33",
-        confirmButtonColor: "#28a745",
-        confirmButtonText: "Yes, Register Subject!",
-        reverseButtons: true
-      }).then(result => {
-        if (result.value) {
-          this.registerSubject(subject.SubjectID);
-          this.$swal(
-            "Confirmed!",
-            "The course has been registered.",
-            "success"
-          );
-        }
-      });
-    }
+    ...mapActions("teacher", ["getAllSubjects"])
   },
   created() {
-    this.getAllSubjects(this.user.user.username);
+    this.getAllSubjects();
   }
 };
 </script>

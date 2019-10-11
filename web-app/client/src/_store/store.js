@@ -5,6 +5,7 @@ import { account } from './account.module';
 import { alert } from './alert.module';
 import { adminAcademy } from './admin.module';
 import { student } from './student.module';
+import { teacher } from './teacher.module';
 
 Vue.use(Vuex);
 
@@ -26,6 +27,7 @@ export default new Vuex.Store({
     account,
     alert,
     adminAcademy,
-    student
+    student,
+    teacher
   }
 });

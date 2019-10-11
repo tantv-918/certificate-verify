@@ -9,9 +9,9 @@ const state = {
 };
 
 const actions = {
-  async getAllSubjects({ commit }) {
+  async getAllSubjects({ commit }, username) {
     try {
-      let listSubjects = await studentService.getAllSubjects();
+      let listSubjects = await studentService.getAllSubjects(username);
       commit('getAllSubjects', listSubjects);
     } catch (error) {
       console.log(error);

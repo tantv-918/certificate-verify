@@ -7,7 +7,8 @@ const state = {
   listStudents: [],
   studentsOfSubject: [],
   subjectsOfTeacher: [],
-  SubjectOfStudent: []
+  subjectOfStudent: [],
+  subjectsNoTeacher: []
 };
 
 const actions = {
@@ -93,6 +94,19 @@ const actions = {
       }
     }
   },
+  async createTeacher({ dispatch, commit }, teacher) {
+    let res = await adminService.createTeacher(teacher);
+    if (!res.success) {
+      dispatch('alert/error', res.msg, { root: true });
+      if ('403'.includes(res.msg)) {
+        router.push('/403');
+      }
+    } else {
+      dispatch('alert/clear', res.success, { root: true });
+      commit('createTeacher', res.teachers);
+    }
+  },
+
   async deleteTeacher({ commit }, teacher) {
     try {
       let listTeachers = await adminService.deleteTeacher(teacher);
@@ -128,10 +142,50 @@ const actions = {
       }
     }
   },
-  async addSubjectOfTeacher({ commit }, subjectId) {
+  async addSubjectOfTeacher({ commit }, { username, subjectId }) {
     try {
-      let listSubjects = await adminService.addSubjectOfTeacher(subjectId);
+      console.log(username, subjectId);
+      let listSubjects = await adminService.addSubjectOfTeacher(username, subjectId);
       commit('addSubjectOfTeacher', listSubjects);
+      location.reload(true);
+    } catch (error) {
+      console.log(error);
+      if ('403'.includes(error.message)) {
+        router.push('/403');
+      }
+    }
+  },
+  async getSubjectsNoTeacher({ commit }) {
+    try {
+      let listSubjects = await adminService.getSubjectsNoTeacher();
+      commit('getSubjectsNoTeacher', listSubjects);
+    } catch (error) {
+      console.log(error);
+      if ('403'.includes(error.message)) {
+        router.push('/403');
+      }
+    }
+  },
+
+  // Teacher Manager
+  async getAllStudents({ commit }) {
+    try {
+      let listStudents = await adminService.getAllStudents();
+      console.log(listStudents);
+      commit('getAllStudents', listStudents);
+    } catch (error) {
+      console.log(error);
+      if ('403'.includes(error.message)) {
+        router.push('/403');
+      }
+    }
+  },
+
+  // Subjects of student
+  async getSubjectsOfStudent({ commit }, Username) {
+    try {
+      let listSubjects = await adminService.getSubjectsOfStudent(Username);
+      commit('getSubjectsOfStudent', listSubjects);
     } catch (error) {
       console.log(error);
       if ('403'.includes(error.message)) {
@@ -168,19 +222,36 @@ const mutations = {
   getAllTeachers(state, listTeachers) {
     state.listTeachers = listTeachers;
   },
+  createTeacher(state, listTeachers) {
+    state.listTeachers = listTeachers;
+  },
   deleteTeacher(state, listTeachers) {
     state.listTeachers = listTeachers;
   },
 
   //  Subjects of Teacher
   getSubjectsOfTeacher(state, listSubjects) {
-    state.subjectsOfTeacher = listSubjects;
+    state.subjectsOfTeacher = listSubjects.subjects;
+    state.subjectsNoTeacher = listSubjects.subjectsNoTeacher;
   },
   deleteSubjectOfTeacher(state, listStudents) {
     state.subjectsOfTeacher = listStudents;
   },
   addSubjectOfTeacher(state, listSubjects) {
     state.listSubjects = listSubjects;
+  },
+  getSubjectsNoTeacher(state, listSubjects) {
+    state.subjectsNoTeacher = listSubjects;
+  },
+
+  // Students Manager
+  getAllStudents(state, listStudents) {
+    state.listStudents = listStudents;
+  },
+
+  // Subjects of student
+  getSubjectsOfStudent(state, listSubjects) {
+    state.subjectOfStudent = listSubjects;
   }
 };
 

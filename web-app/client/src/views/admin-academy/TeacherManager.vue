@@ -4,7 +4,9 @@
       <h1 class="h3 mb-2 text-gray-800">Quản Lý Giáo Viên</h1>
       <div class="card shadow mb-4">
         <div class="card-header py-3">
-          <h6 class="m-0 font-weight-bold text-primary">Danh Sách Giáo Viên</h6>
+          <button class="btn btn-success" @click="btnCreate" v-b-modal.modal-create>
+            <i class="fas fa-plus"></i>
+          </button>
         </div>
         <div class="card-body">
           <div class="table-responsive">
@@ -113,16 +115,66 @@
         </b-form-group>
       </b-form>
     </b-modal>
+
+    <ValidationObserver ref="observer" v-slot="{ passes }">
+      <b-modal
+        id="modal-create"
+        ref="modal-create"
+        title="Tạo Mới Giáo Viên"
+        @ok.prevent="passes(handleCreate)"
+        @cancel="resetInfoModalCreate"
+      >
+        <b-form>
+          <div v-if="alert.message" :class="`text-center alert ${alert.type}`">{{alert.message}}</div>
+          <ValidationProvider rules="required" name="Teacher Username" v-slot="{ valid, errors }">
+            <b-form-group>
+              <b-form-input
+                type="text"
+                v-model="newTeacher.Username"
+                :state="errors[0] ? false : (valid ? true : null)"
+                placeholder="Username"
+              ></b-form-input>
+              <b-form-invalid-feedback id="inputLiveFeedback">{{ errors[0] }}</b-form-invalid-feedback>
+            </b-form-group>
+          </ValidationProvider>
+          <ValidationProvider
+            rules="required|min:6"
+            name="Teacher Fullname"
+            v-slot="{ valid, errors }"
+          >
+            <b-form-group>
+              <b-form-input
+                type="text"
+                v-model="newTeacher.Fullname"
+                :state="errors[0] ? false : (valid ? true : null)"
+                placeholder="Fullname"
+              ></b-form-input>
+              <b-form-invalid-feedback id="inputLiveFeedback">{{ errors[0] }}</b-form-invalid-feedback>
+            </b-form-group>
+          </ValidationProvider>
+        </b-form>
+      </b-modal>
+    </ValidationObserver>
   </div>
 </template>
 
 <script>
 import { mapState, mapActions } from "vuex";
+import { ValidationObserver, ValidationProvider } from "vee-validate";
 export default {
+  components: {
+    ValidationObserver,
+    ValidationProvider
+  },
   data() {
     return {
       teacher: {
-        Fullname: ""
+        Fullname: "",
+        Username: ""
+      },
+      newTeacher: {
+        Fullname: "",
+        Username: ""
       },
       infoModal: {
         id: "info-modal",
@@ -166,17 +218,39 @@ export default {
     };
   },
   computed: {
-    ...mapState("adminAcademy", ["listTeachers"])
+    ...mapState("adminAcademy", ["listTeachers"]),
+    ...mapState({
+      alert: state => state.alert
+    })
   },
   methods: {
-    ...mapActions("adminAcademy", ["getAllTeachers", "deleteTeacher"]),
+    ...mapActions("adminAcademy", [
+      "getAllTeachers",
+      "deleteTeacher",
+      "createTeacher"
+    ]),
     info(item, index, button) {
       this.teacher.Fullname = item.Fullname;
       this.teacher.Username = item.Username;
       this.$root.$emit("bv::show::modal", this.infoModal.id, button);
     },
+    async handleCreate(bvModalEvt) {
+      await this.createTeacher(this.newTeacher);
+      if (this.alert.type != "alert-danger") {
+        this.$refs["modal-create"].hide();
+        await this.resetInfoModalCreate();
+      }
+    },
+    resetInfoModalCreate() {
+      this.newTeacher.Username = "";
+      this.newTeacher.Fullname = "";
+      requestAnimationFrame(() => {
+        this.$refs.observer.reset();
+      });
+    },
     resetInfoModalDetail() {
       this.teacher.Fullname = "";
+      this.teacher.teacher = "";
     },
     deleteSubject(teacher) {
       this.$swal({
@@ -194,6 +268,9 @@ export default {
           this.$swal("Deleted!", "Your file has been deleted.", "success");
         }
       });
+    },
+    btnCreate(item, button) {
+      this.$root.$emit("bv::show::modal", button);
     }
   },
   created() {

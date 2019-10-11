@@ -23,7 +23,7 @@ router.post(
   '/create',
   checkJWT,
   [
-    (check('subjectid')
+    (check('subjectId')
       .not()
       .isEmpty()
       .trim()
@@ -42,11 +42,11 @@ router.post(
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array(), status: '422' });
+      return res.json({ errors: errors.array(), status: '422' });
     }
 
     if (req.decoded.user.role !== USER_ROLES.TEACHER) {
-      res.status(403).json({
+      res.json({
         success: false,
         msg: 'Permission Denied',
         status: '422'
@@ -58,13 +58,13 @@ router.post(
           if (err) throw next(err);
           if (student) {
             let score = {
-              subjectID: req.body.subjectid,
+              subjectID: req.body.subjectId,
               studentUsername: req.body.studentusername,
               scoreValue: req.body.scorevalue
             };
             const networkObj = await network.connectToNetwork(req.decoded.user);
             const response = await network.createScore(networkObj, score);
-            if (response.success == true) {
+            if (response.success) {
               res.json({
                 success: true,
                 msg: response.msg
@@ -85,13 +85,13 @@ router.post(
 );
 
 router.get(
-  '/:subjectid/:studentusername',
+  '/:subjectId/:studentUsername',
   checkJWT,
   [
-    (sanitizeParam('subjectid')
+    (sanitizeParam('subjectId')
       .trim()
       .escape(),
-    sanitizeParam('studentusername')
+    sanitizeParam('studentUsername')
       .trim()
       .escape())
   ],
@@ -100,15 +100,15 @@ router.get(
     if (!result.isEmpty()) {
       return res.status(422).json({ errors: result.array(), status: '422' });
     }
-    const subjectID = req.params.subjectid;
-    const studentUsername = req.params.studentusername;
+    const subjectID = req.params.subjectId;
+    const studentUsername = req.params.studentUsername;
 
     args = [subjectID, studentUsername];
 
     const networkObj = await network.connectToNetwork(req.decoded.user);
 
     const response = await network.query(networkObj, 'QueryScore', args);
-    if (response.success == true) {
+    if (response.success) {
       res.json({
         success: true,
         msg: response.msg.toString()
@@ -127,7 +127,7 @@ router.get('/all', checkJWT, async (req, res) => {
 
   const response = await network.query(networkObj, 'GetAllScores');
 
-  if (response.success == true) {
+  if (response.success) {
     res.json({
       success: true,
       msg: response.msg.toString()

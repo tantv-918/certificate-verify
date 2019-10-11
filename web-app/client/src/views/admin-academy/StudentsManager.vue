@@ -11,13 +11,11 @@
             <b-table
               show-empty
               stacked="md"
-              :items="blogPosts"
+              :items="listStudents ? listStudents : []"
               :fields="fields"
               :current-page="currentPage"
               :per-page="perPage"
             >
-              <template slot="id" slot-scope="row">{{ row.item.id }}</template>
-
               <template slot="Fullname" slot-scope="row">{{ row.item.Fullname }}</template>
 
               <template slot="Username" slot-scope="row">{{ row.item.Username }}</template>
@@ -28,11 +26,11 @@
                   <b-button
                     variant="info"
                     class="mr-1 btn-circle btn-sm"
-                    :to="`students/${row.item.id}/subjects`"
-                    :id="`popover-class-${row.item.id}`"
+                    :to="`students/${row.item.Username}/subjects`"
+                    :id="`popover-class-${row.item.Username}`"
                   >
                     <b-popover
-                      :target="`popover-class-${row.item.id}`"
+                      :target="`popover-class-${row.item.Username}`"
                       triggers="hover"
                       placement="top"
                     >Môn Học</b-popover>
@@ -42,27 +40,14 @@
                     @click="info(row.item, row.index, $event.target)"
                     class="mr-1 btn-circle btn-sm"
                     variant="info"
-                    :id="`popover-info-${row.item.id}`"
+                    :id="`popover-info-${row.item.Username}`"
                   >
                     <b-popover
-                      :target="`popover-info-${row.item.id}`"
+                      :target="`popover-info-${row.item.Username}`"
                       triggers="hover"
                       placement="top"
                     >Chi Tiết</b-popover>
                     <i class="fas fa-info-circle"></i>
-                  </b-button>
-                  <b-button
-                    variant="danger"
-                    @click="deleteSubject(row.item)"
-                    class="btn-circle btn-sm"
-                    :id="`popover-del-${row.item.id}`"
-                  >
-                    <b-popover
-                      :target="`popover-del-${row.item.id}`"
-                      triggers="hover"
-                      placement="top"
-                    >Xóa</b-popover>
-                    <i class="fas fa-trash-alt"></i>
                   </b-button>
                 </div>
               </template>
@@ -72,7 +57,7 @@
           <b-row>
             <b-col md="6" class="my-1">
               <b-pagination
-                :total-rows="blogPosts.length"
+                :total-rows="listStudents ? listStudents.length : 0"
                 :per-page="perPage"
                 v-model="currentPage"
                 class="my-0"
@@ -119,6 +104,7 @@
 </template>
 
 <script>
+import { mapState, mapActions } from "vuex";
 export default {
   data() {
     return {
@@ -129,100 +115,7 @@ export default {
         id: "info-modal",
         total: ""
       },
-      blogPosts: [
-        {
-          id: 1,
-          Username: "helloworld",
-          Fullname: "student01"
-        },
-        {
-          id: 2,
-          Username: "helloworld",
-          Fullname: "student02"
-        },
-        {
-          id: 3,
-          Username: "helloworld",
-          Fullname: "student03"
-        },
-        {
-          id: 4,
-          Username: "helloworld",
-          Fullname: "student04"
-        },
-        {
-          id: 5,
-          Username: "helloworld",
-          Fullname: "student05"
-        },
-        {
-          id: 6,
-          Username: "helloworld",
-          Fullname: "student06"
-        },
-        {
-          id: 7,
-          Username: "helloworld",
-          Fullname: "student07"
-        },
-        {
-          id: 8,
-          Username: "helloworld",
-          Fullname: "student08"
-        },
-        {
-          id: 9,
-          Username: "helloworld",
-          Fullname: "student09"
-        },
-        {
-          id: 10,
-          Username: "helloworld",
-          Fullname: "student10"
-        },
-        {
-          id: 11,
-          Username: "helloworld",
-          Fullname: "student11"
-        },
-        {
-          id: 12,
-          Username: "helloworld",
-          Fullname: "student12"
-        },
-        {
-          id: 13,
-          Username: "helloworld",
-          Fullname: "student13"
-        },
-        {
-          id: 14,
-          Username: "helloworld",
-          Fullname: "student14"
-        },
-        {
-          id: 15,
-          Username: "helloworld",
-          Fullname: "student15"
-        },
-        {
-          id: 16,
-          Username: "helloworld",
-          Fullname: "student16"
-        },
-        {
-          id: 17,
-          Username: "helloworld",
-          Fullname: "student17"
-        },
-        {
-          id: 18,
-          Username: "helloworld",
-          Fullname: "student18"
-        }
-      ],
       fields: [
-        { key: "id", label: "id", class: "text-center", sortable: true },
         {
           key: "Fullname",
           label: "Fullname",
@@ -253,7 +146,11 @@ export default {
       pageOptions: [12, 24, 36]
     };
   },
+  computed: {
+    ...mapState("adminAcademy", ["listStudents"])
+  },
   methods: {
+    ...mapActions("adminAcademy", ["getAllStudents"]),
     info(item, index, button) {
       this.student.Fullname = item.Fullname;
       this.student.Username = item.Username;
@@ -261,23 +158,10 @@ export default {
     },
     resetInfoModalDetail() {
       this.student.Fullname = "";
-    },
-    deleteSubject(item) {
-      this.$swal({
-        title: "Are you sure?",
-        text: "You won't be able to revert this!",
-        type: "warning",
-        showCancelButton: true,
-        cancelButtonColor: "#d33",
-        confirmButtonColor: "#28a745",
-        confirmButtonText: "Yes, delete it!",
-        reverseButtons: true
-      }).then(result => {
-        if (result.value) {
-          this.$swal("Deleted!", "Your file has been deleted.", "success");
-        }
-      });
     }
+  },
+  created() {
+    this.getAllStudents();
   }
 };
 </script>

@@ -51,7 +51,7 @@ router.post(
           fullname: req.body.fullname
         };
         const response = await network.registerStudentOnBlockchain(createdUser);
-        if (response.success == true) {
+        if (response.success) {
           res.json({
             success: true,
             msg: response.msg

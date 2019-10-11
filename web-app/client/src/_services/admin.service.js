@@ -12,7 +12,11 @@ export const adminService = {
   deleteTeacher,
   getSubjectsOfTeacher,
   deleteSubjectOfTeacher,
-  addSubjectOfTeacher
+  addSubjectOfTeacher,
+  createTeacher,
+  getSubjectsNoTeacher,
+  getAllStudents,
+  getSubjectsOfStudent
 };
 
 // Subjects Manager
@@ -31,7 +35,7 @@ async function createSubject(subject) {
   try {
     let respone = await axios.post(
       `${process.env.VUE_APP_API_BACKEND}/subject/create`,
-      { subject: subject },
+      { subjectname: subject.Name },
       {
         headers: authHeader()
       }
@@ -75,9 +79,12 @@ async function deleteSubject(subject) {
 //  Students of subject
 async function getStudentsOfSubject(subjectId) {
   try {
-    let respone = await axios.get(`${process.env.VUE_APP_API_BACKEND}/subject/` + subjectId, {
-      headers: authHeader()
-    });
+    let respone = await axios.get(
+      `${process.env.VUE_APP_API_BACKEND}/subject/${subjectId}/students`,
+      {
+        headers: authHeader()
+      }
+    );
     return respone.data.students;
   } catch (error) {
     throw error;
@@ -101,13 +108,24 @@ async function deleteStudentOfSubject(subjectId, Username) {
 // Teacher Manager
 async function getAllTeachers() {
   try {
-    let respone = await axios.get(`${process.env.VUE_APP_API_BACKEND}/teacher/all`, {
+    let respone = await axios.get(`${process.env.VUE_APP_API_BACKEND}/account/teacher/all`, {
       headers: authHeader()
     });
     return respone.data.teachers;
   } catch (error) {
     throw error;
   }
+}
+
+async function createTeacher(teacher) {
+  let respone = await axios.post(
+    `${process.env.VUE_APP_API_BACKEND}/account/teacher/create`,
+    { username: teacher.Username, fullname: teacher.Fullname },
+    {
+      headers: authHeader()
+    }
+  );
+  return respone.data;
 }
 
 async function deleteTeacher(teacher) {
@@ -126,12 +144,15 @@ async function deleteTeacher(teacher) {
 }
 
 //  Subjects of Teacher
-async function getSubjectsOfTeacher(Username) {
+async function getSubjectsOfTeacher(username) {
   try {
-    let respone = await axios.get(`${process.env.VUE_APP_API_BACKEND}/teacher/` + Username, {
-      headers: authHeader()
-    });
-    return respone.data.subjects;
+    let respone = await axios.get(
+      `${process.env.VUE_APP_API_BACKEND}/account/teacher/${username}/subjects`,
+      {
+        headers: authHeader()
+      }
+    );
+    return respone.data;
   } catch (error) {
     throw error;
   }
@@ -140,7 +161,7 @@ async function getSubjectsOfTeacher(Username) {
 async function deleteSubjectOfTeacher(Username, subjectId) {
   try {
     let respone = await axios.delete(
-      `${process.env.VUE_APP_API_BACKEND}/teacher/${Username}/delete/${subjectId}`,
+      `${process.env.VUE_APP_API_BACKEND}/account/teacher/${Username}/delete/${subjectId}`,
       {
         headers: authHeader()
       }
@@ -151,11 +172,51 @@ async function deleteSubjectOfTeacher(Username, subjectId) {
   }
 }
 
-async function addSubjectOfTeacher(subjectId) {
+async function addSubjectOfTeacher(username, subjectId) {
   try {
     let respone = await axios.post(
-      `${process.env.VUE_APP_API_BACKEND}/teacher/add`,
-      { subjectId },
+      `${process.env.VUE_APP_API_BACKEND}/subject/addsubjectforteacher`,
+      { teacherusername: username, subjectId: subjectId },
+      {
+        headers: authHeader()
+      }
+    );
+    return respone.data.subjects;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function getSubjectsNoTeacher() {
+  try {
+    let respone = await axios({
+      method: 'get',
+      url: `${process.env.VUE_APP_API_BACKEND}/subject/subjecjtsnoteacher`,
+      headers: authHeader()
+    });
+    return respone.data.subjects;
+  } catch (error) {
+    throw error;
+  }
+}
+
+//  Students Manager
+async function getAllStudents() {
+  try {
+    let respone = await axios.get(`${process.env.VUE_APP_API_BACKEND}/account/student/all`, {
+      headers: authHeader()
+    });
+    return respone.data.students;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// Subjects of student
+async function getSubjectsOfStudent(username) {
+  try {
+    let respone = await axios.get(
+      `${process.env.VUE_APP_API_BACKEND}/account/student/${username}/subjects`,
       {
         headers: authHeader()
       }

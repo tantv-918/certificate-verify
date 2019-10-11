@@ -87,7 +87,7 @@
 
     <ValidationObserver ref="observer" v-slot="{ passes }">
       <b-modal
-        :id="infoModal.SubjectID"
+        :id="infoModal.id"
         ref="modal-edit"
         ok-title="Update"
         @ok.prevent="passes(handleUpdate)"
@@ -152,7 +152,7 @@ export default {
         Name: ""
       },
       infoModal: {
-        SubjectID: "info-modal"
+        id: "info-modal"
       },
       fields: [
         {
@@ -188,7 +188,7 @@ export default {
     ]),
     info(item, index, button) {
       this.editSubject.Name = item.Name;
-      this.$root.$emit("bv::show::modal", this.infoModal.SubjectID, button);
+      this.$root.$emit("bv::show::modal", this.infoModal.id, button);
     },
     async handleCreate(bvModalEvt) {
       this.$refs["modal-create"].hide();

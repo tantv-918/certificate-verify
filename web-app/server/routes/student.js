@@ -17,15 +17,48 @@ router.get('/all', async (req, res) => {
 
   const response = await network.query(networkObj, 'GetAllStudents');
 
-  if (response.success == true) {
+  if (response.success) {
     res.json({
       success: true,
-      msg: response.msg
+      students: JSON.parse(response.msg)
     });
   } else {
     res.json({
       success: false,
-      msg: response.msg
+      msg: response.msg.toString()
+    });
+  }
+});
+
+router.get('/:username/subjects', async (req, res, next) => {
+  if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
+    res.status(403).json({
+      success: false,
+      msg: 'Permission Denied',
+      status: '422'
+    });
+  } else {
+    await User.findOne({ username: req.params.username }, async (err, student) => {
+      if (err) throw err;
+      else {
+        const networkObj = await network.connectToNetwork(req.decoded.user);
+        let subjectsByStudent = await network.query(
+          networkObj,
+          'GetSubjectsByStudent',
+          student.username
+        );
+        if (subjectsByStudent.success == true) {
+          res.json({
+            success: true,
+            subjects: JSON.parse(subjectsByStudent.msg)
+          });
+        } else {
+          res.json({
+            success: false,
+            msg: subjectsByStudent.msg.toString()
+          });
+        }
+      }
     });
   }
 
@@ -53,16 +86,33 @@ router.get('/:username', async (req, res) => {
       }
 
       const response = await network.query(networkObj, 'QueryStudent', username);
-
-      if (!response.success) {
-        res.json({
-          success: false,
-          msg: response.msg
-        });
+      const allSubjects = await network.query(networkObj, 'GetAllSubjects');
+      if (allSubjects.success && response.success) {
+        if (!response.msg) {
+          res.json({
+            success: false,
+            msg: 'NOT FOUND',
+            status: 404
+          });
+        } else {
+          let listSubjects = JSON.parse(allSubjects.msg);
+          listSubjects.map((subject) => {
+            if (!subject.Students || !subject.Students.includes(username)) {
+              subject['statusConfirm'] = 0;
+            } else {
+              subject['statusConfirm'] = 1;
+            }
+          });
+          res.json({
+            success: true,
+            msg: response.msg.toString(),
+            subjects: listSubjects
+          });
+        }
       } else {
         res.json({
-          success: true,
-          subjects: response.msg
+          success: false,
+          msg: response.msg.toString()
         });
       }
     }
@@ -72,7 +122,7 @@ router.get('/:username', async (req, res) => {
 router.post(
   '/registersubject',
   [
-    check('subjectid')
+    check('subjectId')
       .not()
       .isEmpty()
       .trim()
@@ -99,10 +149,10 @@ router.post(
             const networkObj = await network.connectToNetwork(req.decoded.user);
             const response = await network.registerStudentForSubject(
               networkObj,
-              req.body.subjectid,
+              req.body.subjectId,
               req.decoded.user.username
             );
-            if (response.success == true) {
+            if (response.success) {
               res.json({
                 success: true,
                 msg: response.msg

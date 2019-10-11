@@ -16,8 +16,8 @@
             >
               <template slot="Fullname" slot-scope="row">{{ row.item.Fullname }}</template>
 
-              <template slot="UserFullname" slot-scope="row">{{ row.item.UserFullname }}</template>
-              <template slot="more">...</template>
+              <template slot="Username" slot-scope="row">{{ row.item.Username }}</template>
+              <template slot="score" slot-scope="row">{{ row.item.ScoreValue }}</template>
 
               <template slot="delete" slot-scope="row">
                 <div class="row justify-content-center">
@@ -38,17 +38,18 @@
                   </div>
                   <div class="col-4 padding-0">
                     <b-button
-                      variant="danger"
-                      @click="deleteSubject(row.item)"
-                      class="float-left btn-circle btn-sm"
-                      :id="`popover-del-${row.item.Username}`"
+                      v-if="!row.item.ScoreValue"
+                      @click="setScore(row.item, row.index, $event.target)"
+                      class="text-center btn-circle btn-sm float-left"
+                      variant="warning"
+                      :id="`popover-edit-${row.item.Username}`"
                     >
                       <b-popover
-                        :target="`popover-del-${row.item.Username}`"
+                        :target="`popover-edit-${row.item.Username}`"
                         triggers="hover"
                         placement="top"
-                      >Xóa</b-popover>
-                      <i class="fas fa-trash-alt"></i>
+                      >Cho Điểm</b-popover>
+                      <i class="fas fa-edit"></i>
                     </b-button>
                   </div>
                 </div>
@@ -70,11 +71,35 @@
       </div>
     </div>
 
+    <ValidationObserver ref="observer" v-slot="{ passes }">
+      <b-modal
+        id="modal-setScore"
+        ref="modal-setScore"
+        title="Cho Điểm Học Viên"
+        @ok.prevent="passes(handleScore)"
+        @cancel="resetInfoModalSetPoint"
+      >
+        <b-form>
+          <ValidationProvider rules="required|min_value:1" name="Score" v-slot="{ valid, errors }">
+            <b-form-group>
+              <b-form-input
+                type="number"
+                v-model="newScore.point"
+                :state="errors[0] ? false : (valid ? true : null)"
+                placeholder="Score"
+              ></b-form-input>
+              <b-form-invalid-feedback id="inputLiveFeedback">{{ errors[0] }}</b-form-invalid-feedback>
+            </b-form-group>
+          </ValidationProvider>
+        </b-form>
+      </b-modal>
+    </ValidationObserver>
+
     <b-modal
       :id="infoModal.id"
       :total="infoModal.total"
       @hide="resetInfoModalDetail"
-      title="Cập Nhật Môn Học"
+      title="Thông tin sinh viên"
       ok-only
       ok-variant="secondary"
       ok-title="Cancel"
@@ -107,20 +132,37 @@
 
 <script>
 import { mapState, mapActions } from "vuex";
+import { ValidationObserver, ValidationProvider } from "vee-validate";
 export default {
+  components: {
+    ValidationObserver,
+    ValidationProvider
+  },
   data() {
     return {
       student: {
-        Fullname: ""
+        Fullname: "",
+        Username: ""
+      },
+      newScore: {
+        subjectId: null,
+        username: "",
+        point: null
       },
       infoModal: {
         id: "info-modal",
         total: ""
       },
-      studentsOfSubject1: [
+      studentsOfSubject: [
         {
           Username: "student01",
-          Fullname: "helloworld"
+          Fullname: "helloworld",
+          ScoreValue: null
+        },
+        {
+          Username: "student01",
+          Fullname: "helloworld",
+          ScoreValue: 8
         }
       ],
       fields: [
@@ -137,8 +179,8 @@ export default {
           sortable: true
         },
         {
-          key: "more",
-          label: "...",
+          key: "score",
+          label: "Score",
           class: "text-center",
           sortable: true
         },
@@ -155,40 +197,35 @@ export default {
     };
   },
   computed: {
-    ...mapState("adminAcademy", ["studentsOfSubject"])
+    // ...mapState("adminAcademy", ["studentsOfSubject"])
   },
   methods: {
-    ...mapActions("adminAcademy", [
-      "getStudentsOfSubject",
-      "deleteStudentOfSubject"
-    ]),
+    ...mapActions("teacher", ["getStudentsOfSubject", "setPointForStudent"]),
     info(item, index, button) {
       this.student.Fullname = item.Fullname;
       this.student.Username = item.Username;
       this.$root.$emit("bv::show::modal", this.infoModal.id, button);
     },
+    setScore(item, index, button) {
+      this.newScore.subjectId = this.$route.params.id;
+      this.newScore.username = item.Username;
+      this.$root.$emit("bv::show::modal", "modal-setScore", button);
+    },
+    handleScore() {
+      this.$refs["modal-setScore"].hide();
+      this.setPointForStudent(this.newScore);
+      this.resetInfoModalSetPoint();
+    },
     resetInfoModalDetail() {
       this.student.Fullname = "";
+      this.student.Username = "";
     },
-    deleteSubject(student) {
-      this.$swal({
-        title: "Are you sure?",
-        text: "You won't be able to revert this!",
-        type: "warning",
-        showCancelButton: true,
-        cancelButtonColor: "#d33",
-        confirmButtonColor: "#28a745",
-        confirmButtonText: "Yes, delete it!",
-        reverseButtons: true
-      }).then(result => {
-        if (result.value) {
-          const SubjectID = this.$route.params.id;
-          this.deleteStudentOfSubject({
-            SubjectID: SubjectID,
-            Username: student.Username
-          });
-          this.$swal("Deleted!", "Your file has been deleted.", "success");
-        }
+    resetInfoModalSetPoint() {
+      this.newScore.point = null;
+      this.newScore.username = "";
+      this.newScore.subjectId = null;
+      requestAnimationFrame(() => {
+        this.$refs.observer.reset();
       });
     }
   },

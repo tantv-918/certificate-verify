@@ -21,6 +21,7 @@ async function login(username, password) {
     localStorage.setItem('user', JSON.stringify(user));
     return user;
   }
+
   return new Error(user);
 }
 

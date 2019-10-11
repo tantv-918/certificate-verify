@@ -107,7 +107,7 @@ router.get('/:certid/verify', async (req, res) => {
         const networkObj = await network.connectToNetwork(defaultUser);
         const response = await network.verifyCertificate(networkObj, ceritificate);
 
-        if (response.success == true) {
+        if (response.success) {
           res.json({
             success: true,
             msg: response.msg.toString()

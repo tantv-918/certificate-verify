@@ -148,17 +148,17 @@ router.get('/subject', async (req, res) => {
           });
         }
 
-        const response = await network.queryUserSubjects(networkObj);
+        const response = await network.query(networkObj, 'GetSubjectsByTeacher', user.username);
 
         if (!response.success) {
           res.json({
             success: false,
-            msg: response.msg
+            msg: response.msg.toString()
           });
         } else {
           res.json({
             success: true,
-            subjects: response.msg
+            subjects: JSON.parse(response.msg)
           });
         }
       }

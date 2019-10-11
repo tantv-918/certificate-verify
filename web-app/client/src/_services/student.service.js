@@ -8,11 +8,14 @@ export const studentService = {
   getMyCertificates
 };
 
-async function getAllSubjects() {
+async function getAllSubjects(username) {
   try {
-    let respone = await axios.get(`${process.env.VUE_APP_API_BACKEND}/student/all`, {
-      headers: authHeader()
-    });
+    let respone = await axios.get(
+      `${process.env.VUE_APP_API_BACKEND}/account/student/${username}`,
+      {
+        headers: authHeader()
+      }
+    );
     return respone.data.subjects;
   } catch (error) {
     throw error;
@@ -21,7 +24,7 @@ async function getAllSubjects() {
 async function registerSubject(subjectId) {
   try {
     let respone = await axios.post(
-      `${process.env.VUE_APP_API_BACKEND}/student/register`,
+      `${process.env.VUE_APP_API_BACKEND}/account/student/registersubject`,
       { subjectId: subjectId },
       {
         headers: authHeader()
