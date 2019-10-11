@@ -268,4 +268,27 @@ router.get('/:subjectId/certificates', checkJWT, async (req, res, next) => {
   });
 });
 
+router.get('/:subjectId/students', checkJWT, async (req, res, next) => {
+  await User.findOne({ username: req.decoded.user }, async (err, user) => {
+    if (err) throw err;
+    else {
+      const subjectID = req.params.subjectId;
+      const networkObj = await network.connectToNetwork(req.decoded.user);
+      const response = await network.query(networkObj, 'GetStudentsBySubject', subjectID);
+
+      if (response.success) {
+        res.json({
+          success: true,
+          students: JSON.parse(response.msg)
+        });
+      } else {
+        res.json({
+          success: false,
+          msg: response.msg.toString()
+        });
+      }
+    }
+  });
+});
+
 module.exports = router;

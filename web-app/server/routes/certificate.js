@@ -24,7 +24,7 @@ router.post(
   '/create',
   checkJWT,
   [
-    (check('subjectId')
+    check('subjectId')
       .not()
       .isEmpty()
       .trim()
@@ -33,7 +33,7 @@ router.post(
       .not()
       .isEmpty()
       .trim()
-      .escape())
+      .escape()
   ],
   async (req, res) => {
     const errors = validationResult(req);

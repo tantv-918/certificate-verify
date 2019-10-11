@@ -93,6 +93,7 @@ func (s *SmartContract) Invoke(stub shim.ChaincodeStubInterface) sc.Response {
 		return StudentRegisterSubject(stub, args)
 	} else if function == "TeacherRegisterSubject" {
 		return TeacherRegisterSubject(stub, args)
+<<<<<<< HEAD
 	} else if function == "GetSubjectsByStudent" {
 		return GetSubjectsByStudent(stub, args)
 	} else if function == "GetCertificatesByStudent" {
@@ -109,6 +110,16 @@ func (s *SmartContract) Invoke(stub shim.ChaincodeStubInterface) sc.Response {
 		return GetScoresBySubject(stub, args)
 	} else if function == "GetScoresBySubjectOfTeacher" {
 		return GetScoresBySubjectOfTeacher(stub, args)
+=======
+	} else if function == "VerifyCertificate" {
+		return VerifyCertificate(stub, args)
+	} else if function == "GetSubjectsByTeacher" {
+		return GetSubjectsByTeacher(stub, args)
+	} else if function == "GetSubjectsByStudent" {
+		return GetSubjectsByStudent(stub, args)
+	} else if function == "GetStudentsBySubject" {
+		return GetStudentsBySubject(stub, args)
+>>>>>>> Teachers-Certificates-Academy
 	}
 
 	return shim.Error("Invalid Smart Contract function name!")
@@ -1142,13 +1153,18 @@ func GetCertificatesBySubject(stub shim.ChaincodeStubInterface, args []string) s
 	return shim.Success(jsonRow)
 }
 
+<<<<<<< HEAD
 func GetScoresBySubject(stub shim.ChaincodeStubInterface, args []string) sc.Response {
+=======
+func GetSubjectsByTeacher(stub shim.ChaincodeStubInterface, args []string) sc.Response {
+>>>>>>> Teachers-Certificates-Academy
 	// MSPID, err := cid.GetMSPID(stub)
 
 	// if err != nil {
 	// 	fmt.Println("Error - cid.GetMSPID()")
 	// }
 
+<<<<<<< HEAD
 	// if MSPID != "AcademyMSP" {
 	// 	shim.Error("WHO ARE YOU ?")
 	// }
@@ -1181,6 +1197,116 @@ func GetScoresBySubject(stub shim.ChaincodeStubInterface, args []string) sc.Resp
 		if score.SubjectID == SubjectID {
 			tlist = append(tlist, score)
 		}
+=======
+	// if MSPID != "StudentMSP" && MSPID != "AcademyMSP" {
+	// 	shim.Error("WHO ARE YOU ?")
+	// }
+
+	TeacherUsername := args[0]
+
+	allSubjects, _ := getListSubjects(stub)
+
+	defer allSubjects.Close()
+
+	var tlist []Subject
+	var i int
+
+	for i = 0; allSubjects.HasNext(); i++ {
+
+		record, err := allSubjects.Next()
+
+		if err != nil {
+			return shim.Success(nil)
+		}
+
+		subject := Subject{}
+		json.Unmarshal(record.Value, &subject)
+		if subject.TeacherUsername == TeacherUsername {
+			tlist = append(tlist, subject)
+		}
+	}
+
+	jsonRow, err := json.Marshal(tlist)
+
+	if err != nil {
+		return shim.Error("Failed")
+	}
+
+	return shim.Success(jsonRow)
+}
+
+func GetSubjectsByStudent(stub shim.ChaincodeStubInterface, args []string) sc.Response {
+	// MSPID, err := cid.GetMSPID(stub)
+
+	// if err != nil {
+	// 	fmt.Println("Error - cid.GetMSPID()")
+	// }
+
+	// if MSPID != "StudentMSP" && MSPID != "AcademyMSP" {
+	// 	shim.Error("WHO ARE YOU ?")
+	// }
+
+	StudentUsername := args[0]
+
+	student, err := getStudent(stub, "Student-"+StudentUsername)
+
+	if err != nil {
+		return shim.Error("Student dose not exist - " + StudentUsername)
+	}
+
+	var tlist []Subject
+	var i int
+
+	for i = 0; i < len(student.Subjects); i++ {
+
+		subject, err := getSubject(stub, "Subject-"+student.Subjects[i])
+		if err != nil {
+			return shim.Error("Student dose not exist - " + StudentUsername)
+		}
+		subject.Students = nil
+		tlist = append(tlist, subject)
+	}
+
+	jsonRow, err := json.Marshal(tlist)
+
+	if err != nil {
+		return shim.Error("Failed")
+	}
+
+	return shim.Success(jsonRow)
+}
+
+func GetStudentsBySubject(stub shim.ChaincodeStubInterface, args []string) sc.Response {
+	// MSPID, err := cid.GetMSPID(stub)
+
+	// if err != nil {
+	// 	fmt.Println("Error - cid.GetMSPID()")
+	// }
+
+	// if MSPID != "StudentMSP" && MSPID != "AcademyMSP" {
+	// 	shim.Error("WHO ARE YOU ?")
+	// }
+
+	SubjectID := args[0]
+
+	subject, err := getSubject(stub, "Subject-"+SubjectID)
+
+	if err != nil {
+		return shim.Error("Subject dose not exist - " + SubjectID)
+	}
+
+	var tlist []Student
+	var i int
+
+	for i = 0; i < len(subject.Students); i++ {
+
+		student, err := getStudent(stub, "Student-"+subject.Students[i])
+		if err != nil {
+			return shim.Error("Student dose not exist - " + subject.Students[i])
+		}
+		student.Subjects = nil
+		tlist = append(tlist, student)
+>>>>>>> Teachers-Certificates-Academy
 	}
 
 	jsonRow, err := json.Marshal(tlist)
