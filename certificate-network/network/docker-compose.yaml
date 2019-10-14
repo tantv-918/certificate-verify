@@ -15,10 +15,17 @@ services:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca.academy.certificate.com
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.academy.certificate.com-cert.pem
+<<<<<<< HEAD
       - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/f292640630a2cf10da03b3e34a9162cccd620cc4582a5e0c0ffbf8e0949112c9_sk
     ports:
       - '7054:7054'
     command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.academy.certificate.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/f292640630a2cf10da03b3e34a9162cccd620cc4582a5e0c0ffbf8e0949112c9_sk -b admin:adminpw'
+=======
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/21190159b398b5dc80d2a9a23eb12b6fecc40b0e7631d8d04268733e9abf3a60_sk
+    ports:
+      - '7054:7054'
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.academy.certificate.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/21190159b398b5dc80d2a9a23eb12b6fecc40b0e7631d8d04268733e9abf3a60_sk -b admin:adminpw'
+>>>>>>> Merge Cong's pull
     volumes:
       - ./crypto-config/peerOrganizations/academy.certificate.com/ca/:/etc/hyperledger/fabric-ca-server-config
     container_name: ca.academy.certificate.com
@@ -31,10 +38,17 @@ services:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca.student.certificate.com
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.student.certificate.com-cert.pem
+<<<<<<< HEAD
       - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/b1208ce59caf7d8336d3d1eda0861c534a319e5d38a365c1830edc6ef589e361_sk
     ports:
       - '8054:7054'
     command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.student.certificate.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/b1208ce59caf7d8336d3d1eda0861c534a319e5d38a365c1830edc6ef589e361_sk -b admin:adminpw'
+=======
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/c3aea6b5e3d8c9bc63672975636e3971697f89e9d43d7fe252af0ef5b5268b46_sk
+    ports:
+      - '8054:7054'
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.student.certificate.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/c3aea6b5e3d8c9bc63672975636e3971697f89e9d43d7fe252af0ef5b5268b46_sk -b admin:adminpw'
+>>>>>>> Merge Cong's pull
     volumes:
       - ./crypto-config/peerOrganizations/student.certificate.com/ca/:/etc/hyperledger/fabric-ca-server-config
     container_name: ca.student.certificate.com
