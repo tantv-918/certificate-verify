@@ -25,11 +25,7 @@ async function registerSubject(subjectId) {
   try {
     let respone = await axios.post(
       `${process.env.VUE_APP_API_BACKEND}/account/student/registersubject`,
-<<<<<<< HEAD
       { subjectId: subjectId },
-=======
-      { subjectid: subjectId },
->>>>>>> Complete Create and Query and Verify Certificate
       {
         headers: authHeader()
       }

@@ -43,7 +43,7 @@ async function handleResponse(response) {
   return new Promise((resolve, reject) => {
     let data = response.data;
     if (response.status === 200) {
-      if (data.success === true) {
+      if (data.success) {
         resolve(data);
       } else {
         reject(data.msg);

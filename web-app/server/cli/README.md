@@ -34,13 +34,13 @@ enrollAdmin Org academy:
 Register 20156425 in studen (student):
 
 ```bash
-	node registerUser.js --username=20156425 --orgMSP=student --fullname=TrinhVanTan --address=TruongDinh --phonenumber=0382794668 --password=123456
+	node registerUser.js --username=20156425 --orgMSP=student --fullname=TrinhVanTan --password=123456
 ```
 
 Register GV00 in academy (teacher):
 
 ```bash
-	node registerUser.js --username=GV00 --orgMSP=academy --fullname=ABC --address=ABC --phonenumber=123 --password=123456
+	node registerUser.js --username=GV00 --orgMSP=academy --fullname=ABC --password=123456
 ```
 
 ## Enroll admin and register user with `intit.sh`

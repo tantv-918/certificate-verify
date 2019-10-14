@@ -11,68 +11,16 @@ import (
 	sc "github.com/hyperledger/fabric/protos/peer"
 )
 
-// func initStudent(stub shim.ChaincodeStubInterface) sc.Response {
-
-// 	students := []Student{
-// 		Student{Username: "20156425", Fullname: "Trinh Van Tan", Subjects: nil },
-// 	}
-
-// 	for i := 0; i < len(students); i++ {
-// 		studentAsBytes, _ := json.Marshal(students[i])
-// 		key := "Student-" + students[i].Username
-
-// 		fmt.Println(key)
-// 		stub.PutState(key, studentAsBytes)
-// 	}
-
-// 	return shim.Success(nil)
-// }
-
-// func initTeacher(stub shim.ChaincodeStubInterface) sc.Response {
-
-// 	teachers := []Teacher{
-// 		Teacher{Username: "GV00", Fullname: "ABC", Subjects: nil},
-// 	}
-
-// 	for i := 0; i < len(teachers); i++ {
-// 		teacherAsBytes, _ := json.Marshal(teachers[i])
-// 		key := "Teacher-" + teachers[i].Username
-
-// 		fmt.Println(key)
-// 		stub.PutState(key, teacherAsBytes)
-// 	}
-
-// 	return shim.Success(nil)
-// }
-
-// func initSubject(stub shim.ChaincodeStubInterface) sc.Response {
-
-// 	subjects := []Subject{
-// 		Subject{SubjectID: "00", Name: "Blockchain", TeacherUsername: "GV00"},
-// 		Subject{SubjectID: "01", Name: "Sawtooth", TeacherUsername: "GV01"},
-// 	}
-
-// 	for i := 0; i < len(subjects); i++ {
-// 		subjectAsBytes, _ := json.Marshal(subjects[i])
-// 		key := "Subject-" + subjects[i].SubjectID
-
-// 		fmt.Println(key)
-// 		stub.PutState(key, subjectAsBytes)
-// 	}
-
-// 	return shim.Success(nil)
-// }
-
 func CreateStudent(stub shim.ChaincodeStubInterface, args []string) sc.Response {
 
 	MSPID, err := cid.GetMSPID(stub)
 
 	if err != nil {
-		shim.Error("Error - cide.GetMSPID()")
+		return shim.Error("Error - cide.GetMSPID()")
 	}
 
 	if MSPID != "StudentMSP" {
-		shim.Error("WHO ARE YOU")
+		return shim.Error("WHO ARE YOU")
 	}
 
 	if len(args) != 2 {
@@ -106,11 +54,11 @@ func CreateTeacher(stub shim.ChaincodeStubInterface, args []string) sc.Response 
 	MSPID, err := cid.GetMSPID(stub)
 
 	if err != nil {
-		shim.Error("Error - cide.GetMSPID()")
+		return shim.Error("Error - cide.GetMSPID()")
 	}
 
 	if MSPID != "AcademyMSP" {
-		shim.Error("WHO ARE YOU")
+		return shim.Error("WHO ARE YOU")
 	}
 
 	if len(args) != 2 {
@@ -140,14 +88,15 @@ func CreateTeacher(stub shim.ChaincodeStubInterface, args []string) sc.Response 
 }
 
 func CreateSubject(stub shim.ChaincodeStubInterface, args []string) sc.Response {
+
 	MSPID, err := cid.GetMSPID(stub)
 
 	if err != nil {
-		shim.Error("Error - cide.GetMSPID()")
+		return shim.Error("Error - cide.GetMSPID()")
 	}
 
 	if MSPID != "AcademyMSP" {
-		shim.Error("WHO ARE YOU")
+		return shim.Error("WHO ARE YOU")
 	}
 
 	if len(args) != 2 {
@@ -177,6 +126,7 @@ func CreateSubject(stub shim.ChaincodeStubInterface, args []string) sc.Response 
 }
 
 func CreateScore(stub shim.ChaincodeStubInterface, args []string) sc.Response {
+
 	MSPID, err := cid.GetMSPID(stub)
 
 	if err != nil {
@@ -190,11 +140,17 @@ func CreateScore(stub shim.ChaincodeStubInterface, args []string) sc.Response {
 	TeacherUsername, found, err := cid.GetAttributeValue(stub, "username")
 
 	if err != nil {
-		shim.Error("Error - cide.GetMSPID()?")
+		return shim.Error("Error - cide.GetMSPID()?")
 	}
 
 	if found == false {
-		shim.Error("WHO ARE YOU ?")
+		return shim.Error("WHO ARE YOU ?")
+	}
+
+	_, err = getTeacher(stub, TeacherUsername)
+
+	if err != nil {
+		return shim.Error("WHO ARE YOU ?")
 	}
 
 	fmt.Println("Start Create Score!")
@@ -222,7 +178,7 @@ func CreateScore(stub shim.ChaincodeStubInterface, args []string) sc.Response {
 	}
 
 	if checkSubjectExist.TeacherUsername != TeacherUsername {
-		shim.Error("WHO ARE YOU ?")
+		return shim.Error("WHO ARE YOU ?")
 	}
 
 	key := "Score-" + " " + "Subject-" + SubjectID + " " + "Student-" + StudentUsername
@@ -243,10 +199,11 @@ func CreateScore(stub shim.ChaincodeStubInterface, args []string) sc.Response {
 }
 
 func CreateCertificate(stub shim.ChaincodeStubInterface, args []string) sc.Response {
+
 	MSPID, err := cid.GetMSPID(stub)
 
 	if err != nil {
-		shim.Error("Error - cide.GetMSPID()")
+		return shim.Error("Error - cide.GetMSPID()")
 	}
 
 	if MSPID != "AcademyMSP" {

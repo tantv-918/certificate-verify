@@ -7,7 +7,7 @@
 # Exit on first error, print all commands.
 set -ev
 
-sh ./replace-privatekey.sh
+bash ./replace-privatekey.sh
 #sleep 1
 
 

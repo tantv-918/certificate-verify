@@ -3,6 +3,7 @@ node-cli/node-cli
 *.pyc
 /build/*
 /certificate-network/bin
+/certificate-network/network/docker-compose.yaml
 /certificate-network/network/channel-artifacts
 /certificate-network/network/crypto-config
 web-app/server/.env

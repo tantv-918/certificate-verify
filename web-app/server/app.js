@@ -70,12 +70,11 @@ app.use(
 
 // Set up routes
 app.use('/auth', authRoutes);
-app.use('/certificate', certificateRoutes);
-app.use('/subject', checkJWT, subjectRoutes);
-app.use('/score', scoreRoutes);
 app.use('/account/student', checkJWT, studentRoutes);
 app.use('/account/teacher', checkJWT, teacherRoutes);
 app.use('/subject', checkJWT, subjectRoutes);
+app.use('/score', checkJWT, scoreRoutes);
+app.use('/certificate', certificateRoutes);
 app.use('/account/me', checkJWT, meRoutes);
 
 app.get('/', (req, res, next) => {

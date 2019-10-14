@@ -44,7 +44,7 @@ exports.connectToNetwork = async function(user, cli = false) {
     );
     let walletPath = path.join(process.cwd(), `cli/wallet-${orgMSP}`);
 
-    if (cli == true) {
+    if (cli) {
       walletPath = path.join(process.cwd(), `/wallet-${orgMSP}`);
     }
 
