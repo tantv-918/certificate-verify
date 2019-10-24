@@ -5,7 +5,6 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
 const checkJWT = require('./middlewares/check-jwt');
-
 const app = express();
 
 require('dotenv').config();

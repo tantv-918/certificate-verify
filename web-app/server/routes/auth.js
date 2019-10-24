@@ -3,10 +3,12 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const { check, validationResult } = require('express-validator');
-let checkJWT = require('../middlewares/check-jwt');
-let secretJWT = require('../config/index').secret;
+let secretJWT = require('../configs/secret').secret;
 const USER_ROLES = require('../configs/constant').USER_ROLES;
 const network = require('../fabric/network');
+const passport = require('passport');
+const passportOauth = require('../configs/passport-oauth');
+const signJWT = require('../middlewares/sign-jwt');
 
 router.get('/', async (req, res) => {
   return res.json({
@@ -130,6 +132,33 @@ router.post(
         role: user.role
       });
     });
+  }
+);
+
+router.get(
+  '/google',
+  passport.authenticate('google', {
+    session: false,
+    scope: ['profile', 'email']
+  })
+);
+
+router.get('/google/callback', passport.authenticate('google', { session: false }), (req, res) => {
+  signJWT.signToken(req, res);
+});
+
+router.get(
+  '/facebook',
+  passport.authenticate('facebook', {
+    session: false
+  })
+);
+
+router.get(
+  '/facebook/callback',
+  passport.authenticate('facebook', { session: false }),
+  (req, res) => {
+    signJWT.signToken(req, res);
   }
 );
 
