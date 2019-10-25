@@ -6,6 +6,13 @@ module.exports.USER_ROLES = {
   STUDENT: 4
 };
 
+module.exports.OAUTH_TYPES = {
+  TYPES: [0, 1, 2],
+  NO: 0,
+  GOOGLE: 1,
+  FACEBOOK: 2
+};
+
 module.exports.STATUS_CERT = {
   STATUS: [0, 1, 2],
   NO_SCORE: 0, // chưa có điểm

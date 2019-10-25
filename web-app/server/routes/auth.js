@@ -9,6 +9,7 @@ const network = require('../fabric/network');
 const passport = require('passport');
 const passportOauth = require('../configs/passport-oauth');
 const signJWT = require('../middlewares/sign-jwt');
+const OAUTH_TYPES = require('../configs/constant').OAUTH_TYPES;
 
 router.get('/', async (req, res) => {
   return res.json({
@@ -56,6 +57,7 @@ router.post(
       let createdUser = {
         username: req.body.username,
         password: req.body.password,
+        oauthType: OAUTH_TYPES.NO,
         fullname: req.body.fullname
       };
       const response = await network.registerStudentOnBlockchain(createdUser);
@@ -125,11 +127,9 @@ router.post(
 
       return res.json({
         success: true,
-        username: req.body.username,
-        user: user.name,
+        fullname: user.fullname,
         msg: 'Login success',
-        token: token,
-        role: user.role
+        token: token
       });
     });
   }

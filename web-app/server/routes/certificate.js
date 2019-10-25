@@ -50,13 +50,14 @@ router.post(
         msg: 'Permission Denied'
       });
     }
+    let identity = req.body.studentUsername;
     const networkObj = await network.connectToNetwork(req.decoded.user);
     var issueDate = new Date().toString();
 
     let certificate = {
       certificateID: uuidv4(),
       subjectID: req.body.subjectId,
-      studentUsername: req.body.studentUsername,
+      studentUsername: identity,
       issueDate: issueDate
     };
 
@@ -126,33 +127,23 @@ router.get('/all', checkJWT, async (req, res) => {
       msg: 'Permission Denied'
     });
   }
-
-  await User.findOne({ username: req.decoded.user.username }, async (err, user) => {
+  await Certificate.find(async (err, ceritificates) => {
     if (err) {
       return res.json({
         success: false,
         msg: err
       });
     }
-    await Certificate.find(async (err, ceritificates) => {
-      if (err) {
-        return res.json({
-          success: false,
-          msg: err
-        });
-      }
-
-      if (!ceritificates) {
-        return res.json({
-          success: false,
-          msg: 'do not have certificate'
-        });
-      }
-
+    if (!ceritificates) {
       return res.json({
-        success: true,
-        ceritificates: ceritificates
+        success: false,
+        msg: 'do not have certificate'
       });
+    }
+
+    return res.json({
+      success: true,
+      ceritificates: ceritificates
     });
   });
 });
@@ -182,44 +173,35 @@ router.get('/:certId', async (req, res) => {
 });
 
 router.get('/:certId/verify', checkJWT, async (req, res) => {
-  let username = req.decoded.user.username;
-
-  User.findOne({ username: username }, async (err, user) => {
+  let user = req.decoded.user;
+  var certId = req.params.certId;
+  Certificate.findOne({ certificateID: certId }, async (err, ceritificate) => {
     if (err) {
       return res.json({
         success: false,
         msg: err
       });
     }
-    var certId = req.params.certId;
-    Certificate.findOne({ certificateID: certId }, async (err, ceritificate) => {
-      if (err) {
-        return res.json({
-          success: false,
-          msg: err
-        });
-      }
 
-      if (!ceritificate) {
-        return res.json({
-          success: false,
-          msg: 'ceritificate is not exists'
-        });
-      }
+    if (!ceritificate) {
+      return res.json({
+        success: false,
+        msg: 'ceritificate is not exists'
+      });
+    }
 
-      const networkObj = await network.connectToNetwork(user);
-      const response = await network.verifyCertificate(networkObj, ceritificate);
+    const networkObj = await network.connectToNetwork(user);
+    const response = await network.verifyCertificate(networkObj, ceritificate);
 
-      if (response.success) {
-        return res.json({
-          success: true,
-          msg: response.msg.toString()
-        });
-      }
+    if (!response.success) {
       return res.json({
         success: false,
         msg: response.msg.toString()
       });
+    }
+    return res.json({
+      success: true,
+      msg: response.msg.toString()
     });
   });
 });

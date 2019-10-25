@@ -76,12 +76,6 @@ app.use('/score', checkJWT, scoreRoutes);
 app.use('/certificate', certificateRoutes);
 app.use('/account/me', checkJWT, meRoutes);
 
-//app.use('/cert', certRouter);
-
-app.get('/', (req, res, next) => {
-  res.json({ title: 'Hello' });
-});
-
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
   const err = new Error('Not Found');

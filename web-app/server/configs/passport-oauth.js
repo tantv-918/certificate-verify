@@ -3,6 +3,8 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
 const User = require('../models/User');
 const USER_ROLES = require('./constant').USER_ROLES;
+const OAUTH_TYPES = require('./constant').OAUTH_TYPES;
+const network = require('../fabric/network');
 
 require('dotenv').config();
 
@@ -14,13 +16,25 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET
     },
     async (accessToken, refreshToken, profile, done) => {
-      const currentUser = await User.findOne({ googleId: profile.id });
-      if (currentUser) {
-        return done(null, currentUser);
-      } else {
-        const newUser = await new User({ googleId: profile.id, role: USER_ROLES.STUDENT }).save();
-        return done(null, newUser);
+      let user;
+      user = await User.findOne({
+        username: profile.id,
+        oauthType: OAUTH_TYPES.GOOGLE
+      });
+      if (user) {
+        return done(null, user);
       }
+      user = {
+        username: profile.id,
+        oauthType: OAUTH_TYPES.GOOGLE,
+        fullname: profile.name.familyName + ' ' + profile.name.givenName
+      };
+      const response = await network.registerStudentOnBlockchain(user);
+
+      if (!response.success) {
+        return done(null, { success: false, msg: 'Register failed' });
+      }
+      return done(null, user);
     }
   )
 );
@@ -35,14 +49,24 @@ passport.use(
       profileFields: ['id', 'displayName', 'photos', 'email']
     },
     async (accessToken, refreshToken, profile, done) => {
-      const currentUser = await User.findOne({ facebookId: profile.id });
-      console.log(profile.id);
-      if (currentUser) {
-        return done(null, currentUser);
-      } else {
-        const newUser = await new User({ facebookId: profile.id, role: USER_ROLES.STUDENT }).save();
-        return done(null, newUser);
+      let user;
+      user = await User.findOne({
+        username: profile.id,
+        oauthType: OAUTH_TYPES.FACEBOOK
+      });
+      if (user) {
+        return done(null, user);
       }
+      user = {
+        username: profile.id,
+        oauthType: OAUTH_TYPES.FACEBOOK,
+        fullname: profile.displayName
+      };
+      const response = await network.registerStudentOnBlockchain(user);
+      if (!response.success) {
+        return done(null, { success: false, msg: 'Register failed' });
+      }
+      return done(null, user);
     }
   )
 );

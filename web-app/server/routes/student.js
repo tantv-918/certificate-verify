@@ -37,7 +37,8 @@ router.get('/:username/subjects', async (req, res, next) => {
       status: 403
     });
   }
-  await User.findOne({ username: req.params.username }, async (err, student) => {
+  let identity = req.params.username;
+  await User.findOne({ username: identity, role: USER_ROLES.STUDENT }, async (err, student) => {
     if (err) {
       return res.json({ success: false, msg: 'error query subjects of student' });
     }
@@ -47,20 +48,16 @@ router.get('/:username/subjects', async (req, res, next) => {
     }
 
     const networkObj = await network.connectToNetwork(req.decoded.user);
-    let subjectsByStudent = await network.query(
-      networkObj,
-      'GetSubjectsByStudent',
-      student.username
-    );
-    if (subjectsByStudent.success) {
+    let subjectsByStudent = await network.query(networkObj, 'GetSubjectsByStudent', identity);
+    if (!subjectsByStudent.success) {
       return res.json({
-        success: true,
-        subjects: JSON.parse(subjectsByStudent.msg)
+        success: false,
+        msg: subjectsByStudent.msg.toString()
       });
     }
     return res.json({
-      success: false,
-      msg: subjectsByStudent.msg.toString()
+      success: true,
+      subjects: JSON.parse(subjectsByStudent.msg)
     });
   });
 });
@@ -72,30 +69,30 @@ router.get('/:username/scores', async (req, res, next) => {
       msg: 'Permission Denied',
       status: 403
     });
-  } else {
-    await User.findOne({ username: req.params.username }, async (err, student) => {
-      if (err) {
-        return res.json({ success: false, msg: 'error query scores of student' });
-      }
+  }
+  let identity = req.params.username;
+  await User.findOne({ username: identity, role: USER_ROLES.STUDENT }, async (err, student) => {
+    if (err) {
+      return res.json({ success: false, msg: 'error query scores of student' });
+    }
 
-      if (!student) {
-        return res.json({ success: false, msg: 'student is not exists' });
-      }
+    if (!student) {
+      return res.json({ success: false, msg: 'student is not exists' });
+    }
 
-      const networkObj = await network.connectToNetwork(student.user);
-      let scoresByStudent = await network.query(networkObj, 'GetScoresByStudent', student.username);
-      if (scoresByStudent.success) {
-        return res.json({
-          success: true,
-          scores: JSON.parse(scoresByStudent.msg)
-        });
-      }
+    const networkObj = await network.connectToNetwork(req.decoded.user);
+    let scoresByStudent = await network.query(networkObj, 'GetScoresByStudent', identity);
+    if (!scoresByStudent.success) {
       return res.json({
         success: false,
         msg: scoresByStudent.msg.toString()
       });
+    }
+    return res.json({
+      success: true,
+      scores: JSON.parse(scoresByStudent.msg)
     });
-  }
+  });
 });
 
 router.get('/:username/certificates', async (req, res, next) => {
@@ -105,34 +102,34 @@ router.get('/:username/certificates', async (req, res, next) => {
       msg: 'Permission Denied',
       status: 403
     });
-  } else {
-    await User.findOne({ username: req.params.username }, async (err, student) => {
-      if (err) {
-        return res.json({ success: false, msg: 'error query certificates of student' });
-      }
+  }
+  let identity = req.params.username;
+  await User.findOne({ username: identity, role: USER_ROLES.STUDENT }, async (err, student) => {
+    if (err) {
+      return res.json({ success: false, msg: 'error query certificates of student' });
+    }
 
-      if (!student) {
-        return res.json({ success: false, msg: 'student is not exists' });
-      }
+    if (!student) {
+      return res.json({ success: false, msg: 'student is not exists' });
+    }
 
-      const networkObj = await network.connectToNetwork(student.user);
-      let certificatesByStudent = await network.query(
-        networkObj,
-        'GetCertificatesByStudent',
-        student.username
-      );
-      if (certificatesByStudent.success) {
-        return res.json({
-          success: true,
-          certificates: JSON.parse(certificatesByStudent.msg)
-        });
-      }
+    const networkObj = await network.connectToNetwork(req.decoded.user);
+    let certificatesByStudent = await network.query(
+      networkObj,
+      'GetCertificatesByStudent',
+      identity
+    );
+    if (!certificatesByStudent.success) {
       return res.json({
         success: false,
         msg: certificatesByStudent.msg.toString()
       });
+    }
+    return res.json({
+      success: true,
+      certificates: JSON.parse(certificatesByStudent.msg)
     });
-  }
+  });
 });
 
 module.exports = router;

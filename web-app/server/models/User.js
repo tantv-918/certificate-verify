@@ -7,22 +7,15 @@ const UserSchema = new Schema({
     type: String,
     trim: true,
     lowercase: true,
-    // unique: true,
     match: [/^[a-zA-Z0-9]+$/, 'is invalid']
+  },
+  fullname: {
+    type: String
   },
   password: {
     type: String
   },
-  googleId: {
-    type: String,
-    default: null,
-    unique: true
-  },
-  facebookId: {
-    type: String,
-    default: null,
-    unique: true
-  },
+  oauthType: Number,
   role: Number
 });
 

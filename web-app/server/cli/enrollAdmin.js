@@ -75,14 +75,14 @@ async function main() {
 
     let user;
 
-    if (orgMSP == 'student') {
+    if (orgMSP === 'student') {
       user = new User({
         username: process.env.ADMIN_STUDENT_USERNAME,
         password: process.env.ADMIN_STUDENT_PASSWORD,
         role: USER_ROLES.ADMIN_STUDENT
       });
     }
-    if (orgMSP == 'academy') {
+    if (orgMSP === 'academy') {
       user = new User({
         username: process.env.ADMIN_ACADEMY_USERNAME,
         password: process.env.ADMIN_ACADEMY_PASSWORD,
