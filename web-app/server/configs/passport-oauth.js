@@ -27,7 +27,8 @@ passport.use(
       user = {
         username: profile.id,
         oauthType: OAUTH_TYPES.GOOGLE,
-        fullname: profile.name.familyName + ' ' + profile.name.givenName
+        fullname: profile.name.familyName + ' ' + profile.name.givenName,
+        role: USER_ROLES.STUDENT
       };
       const response = await network.registerStudentOnBlockchain(user);
 

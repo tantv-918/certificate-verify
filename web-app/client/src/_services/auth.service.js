@@ -3,7 +3,8 @@ import axios from 'axios';
 export const authService = {
   login,
   register,
-  logout
+  logout,
+  loginGoogle
 };
 
 async function login(username, password) {
@@ -37,6 +38,23 @@ async function register(user) {
 async function logout() {
   await localStorage.removeItem('user');
   location.reload(true);
+}
+
+async function loginGoogle(code) {
+  let respone = await axios.get(
+    `${process.env.VUE_APP_API_BACKEND}/auth/google/callback?code=` + code,
+    {
+      'content-type': 'application/x-www-form-urlencoded'
+    }
+  );
+
+  let user = await handleResponse(respone);
+  if (user.token) {
+    localStorage.setItem('user', JSON.stringify(user));
+    return user;
+  }
+
+  return new Error(user);
 }
 
 async function handleResponse(response) {

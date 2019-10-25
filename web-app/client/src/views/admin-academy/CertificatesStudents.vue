@@ -128,6 +128,7 @@ import { STATUS_CERT } from "../../_helpers/constants";
 export default {
   data() {
     return {
+      STATUS_CERT: STATUS_CERT,
       student: {
         Username: "",
         Fullname: "",

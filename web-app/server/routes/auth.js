@@ -129,7 +129,8 @@ router.post(
         success: true,
         fullname: user.fullname,
         msg: 'Login success',
-        token: token
+        token: token,
+        role: user.role
       });
     });
   }
