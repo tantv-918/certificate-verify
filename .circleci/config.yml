@@ -1,0 +1,58 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/web-app/server
+    docker:
+      - image: circleci/node:10-browsers
+    steps:
+      - checkout
+      - run:
+          name: Update npm
+          command: 'sudo npm install -g npm@latest'
+      - restore_cache:
+          key: dependency-cache-{{ checksum "web-app/server/package.json" }}
+      - run:
+          name: Install npm
+          command: cd web-app/server && npm install
+      - run: mkdir reports
+      - run:
+          name: npm test
+          command: cd web-app/server && ./node_modules/.bin/nyc ./node_modules/.bin/mocha --recursive --timeout=5000 --exit
+          when: always
+      - run:
+          name: code-coverage
+          command: |
+            cd web-app/server &&
+            # nyc report requires that nyc has already been run,
+            # which creates the .nyc_output folder containing necessary data
+            ./node_modules/.bin/nyc report --reporter=text-lcov > coverage/lcov.info
+            # ./cc-test-reporter after-build -t lcov
+          when: always
+      - store_test_results:
+          path: reports
+      - store_artifacts:
+          path: ./reports/mocha/test-results.xml
+      - store_artifacts:
+          path: /coverage/lcov.info
+      - run:
+          name: Sending notification
+          when: on_success
+          command: |
+            if [[ true ]];  then
+              curl -X POST -H "X-ChatWorkToken: $CHATWORK_TOKEN" -d \
+                "body=[info][title] $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME BUIL SUCCESS (flex) [/title]Repository name: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME%0AAuthor: $CIRCLE_USERNAME%0ABranch: $CIRCLE_BRANCH%0ACommit/pull request link: https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/commit/$CIRCLE_SHA1%0ABuild link: https://circleci.com/gh/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$CIRCLE_BUILD_NUM[/info]" \
+                "https://api.chatwork.com/v2/rooms/$CHATWORK_ROOM/messages"
+            fi
+      - run:
+          name: Sending notification
+          when: on_fail
+          command: |
+            if [[ true ]];  then
+              curl -X POST -H "X-ChatWorkToken: $CHATWORK_TOKEN" -d \
+                "body=[info][title] $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME BUIL FAILED (anger) [/title]Repository name: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME%0AAuthor: $CIRCLE_USERNAME%0ABranch: $CIRCLE_BRANCH%0ACommit/pull request link: https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/commit/$CIRCLE_SHA1%0ABuild link: https://circleci.com/gh/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$CIRCLE_BUILD_NUM[/info]" \
+                "https://api.chatwork.com/v2/rooms/$CHATWORK_ROOM/messages"
+            fi
+      - save_cache:
+          key: dependency-cache-{{ checksum "web-app/server/package.json" }}
+          paths:
+            - node_modules
