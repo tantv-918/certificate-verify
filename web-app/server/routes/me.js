@@ -19,8 +19,8 @@ router.get('/', async (req, res) => {
         status: 500
       });
     }
-
-    const response = await network.query(networkObj, 'QueryStudent', user.username);
+    let identity = user.username;
+    const response = await network.query(networkObj, 'QueryStudent', identity);
     if (!response.success) {
       return res.json({
         success: false,
@@ -176,101 +176,101 @@ router.get(
   ],
   async (req, res) => {
     const user = req.decoded.user;
-    if (user.role === USER_ROLES.TEACHER) {
-      const networkObj = await network.connectToNetwork(user);
-      var subjectID = req.params.subjectId;
-
-      if (!networkObj) {
-        return res.json({
-          success: false,
-          msg: 'Failed connect to blockchain',
-          status: 500
-        });
-      }
-
-      const response = await network.query(networkObj, 'GetScoresBySubjectOfTeacher', subjectID);
-
-      if (!response.success) {
-        return res.json({
-          success: false,
-          scores: JSON.parse(response.msg)
-        });
-      }
+    if (user.role !== USER_ROLES.TEACHER) {
       return res.json({
-        success: true,
+        success: false,
+        msg: 'Permission Denied'
+      });
+    }
+
+    const networkObj = await network.connectToNetwork(user);
+    var subjectID = req.params.subjectId;
+
+    if (!networkObj) {
+      return res.json({
+        success: false,
+        msg: 'Failed connect to blockchain',
+        status: 500
+      });
+    }
+
+    const response = await network.query(networkObj, 'GetScoresBySubjectOfTeacher', subjectID);
+
+    if (!response.success) {
+      return res.json({
+        success: false,
         subjects: response.msg.toString()
       });
     }
     return res.json({
       success: true,
-      msg: 'You do not have subject'
+      scores: JSON.parse(response.msg)
     });
   }
 );
 
-router.get('/mycertificates', async (req, res) => {
+router.get('/certificates', async (req, res) => {
   const user = req.decoded.user;
 
-  if (user.role === USER_ROLES.STUDENT) {
-    const networkObj = await network.connectToNetwork(user);
-
-    if (!networkObj) {
-      return res.json({
-        success: false,
-        msg: 'Failed connect to blockchain',
-        status: 500
-      });
-    }
-
-    const response = await network.query(networkObj, 'GetMyCerts');
-
-    if (!response.success) {
-      return res.json({
-        success: false,
-        certificates: JSON.parse(response.msg)
-      });
-    }
+  if (user.role !== USER_ROLES.STUDENT) {
     return res.json({
-      success: true,
+      success: false,
+      msg: 'Permission Denied'
+    });
+  }
+  const networkObj = await network.connectToNetwork(user);
+
+  if (!networkObj) {
+    return res.json({
+      success: false,
+      msg: 'Failed connect to blockchain',
+      status: 500
+    });
+  }
+
+  const response = await network.query(networkObj, 'GetMyCerts');
+
+  if (!response.success) {
+    return res.json({
+      success: false,
       msg: response.msg.toString()
     });
   }
   return res.json({
     success: true,
-    msg: 'You are not student'
+    certificates: JSON.parse(response.msg)
   });
 });
 
 router.get('/scores', async (req, res) => {
   const user = req.decoded.user;
-
-  if (user.role === USER_ROLES.STUDENT) {
-    const networkObj = await network.connectToNetwork(user);
-
-    if (!networkObj) {
-      return res.json({
-        success: false,
-        msg: 'Failed connect to blockchain',
-        status: 500
-      });
-    }
-
-    const response = await network.query(networkObj, 'GetMyScores');
-
-    if (!response.success) {
-      return res.json({
-        success: false,
-        scores: JSON.parse(response.msg)
-      });
-    }
+  if (user.role !== USER_ROLES.STUDENT) {
     return res.json({
-      success: true,
+      success: false,
+      msg: 'Permission Denied'
+    });
+  }
+  const networkObj = await network.connectToNetwork(user);
+
+  if (!networkObj) {
+    return res.json({
+      success: false,
+      msg: 'Failed connect to blockchain',
+      status: 500
+    });
+  }
+
+  const response = await network.query(networkObj, 'GetMyScores');
+
+  if (!response.success) {
+    return res.json({
+      success: false,
       msg: response.msg
     });
   }
   return res.json({
     success: true,
-    msg: 'You are not student'
+    scores: JSON.parse(response.msg)
   });
 });
 
@@ -296,11 +296,20 @@ router.post(
         status: 403
       });
     }
-    const networkObj = await network.connectToNetwork(req.decoded.user);
+    let user = req.decoded.user;
+    const networkObj = await network.connectToNetwork(user);
+    let identity = user.username;
+    if (identity === null) {
+      return res.json({
+        success: false,
+        msg: 'Permission Denied',
+        status: 403
+      });
+    }
     const response = await network.registerStudentForSubject(
       networkObj,
       req.body.subjectId,
-      req.decoded.user.username
+      identity
     );
     if (!response.success) {
       return res.json({
@@ -360,70 +369,74 @@ router.post(
         status: 403
       });
     }
-    User.findOne(
-      { username: req.body.studentUsername, role: USER_ROLES.STUDENT },
-      async (err, student) => {
-        if (err) throw next(err);
-        if (student) {
-          let score = {
-            subjectID: req.body.subjectId,
-            studentUsername: req.body.studentUsername,
-            scoreValue: req.body.scoreValue
-          };
-          const networkObj = await network.connectToNetwork(req.decoded.user);
-          const response = await network.createScore(networkObj, score);
+    let identity = req.body.studentUsername;
+    User.findOne({ username: identity, role: USER_ROLES.STUDENT }, async (err, student) => {
+      if (err) throw next(err);
+      if (student) {
+        let score = {
+          subjectID: req.body.subjectId,
+          studentUsername: identity,
+          scoreValue: req.body.scoreValue
+        };
+        const networkObj = await network.connectToNetwork(req.decoded.user);
+        const response = await network.createScore(networkObj, score);
 
-          if (response.success) {
-            return res.json({
-              success: true,
-              msg: response.msg.toString()
-            });
-          }
+        if (!response.success) {
           return res.json({
             success: false,
             msg: response.msg.toString()
           });
         }
+        return res.json({
+          success: true,
+          msg: response.msg.toString()
+        });
       }
-    );
+    });
   }
 );
 
 router.get('/:subjectId/students', checkJWT, async (req, res, next) => {
-  await User.findOne({ username: req.decoded.user }, async (err, user) => {
-    if (err) throw err;
-    else {
-      const subjectId = req.params.subjectId;
-      const networkObj = await network.connectToNetwork(req.decoded.user);
-      const queryStudents = await network.query(networkObj, 'GetStudentsBySubject', subjectId);
-      const queryScore = await network.query(networkObj, 'GetScoresBySubject', subjectId);
+  if (
+    req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY &&
+    req.decoded.user.role !== USER_ROLES.TEACHER
+  ) {
+    return res.json({
+      success: false,
+      msg: 'Permission Denied',
+      status: 403
+    });
+  }
 
-      if (!queryStudents.success || !queryScore.success) {
-        return res.json({
-          success: false,
-          msg: 'Error when call chaincode'
-        });
-      }
+  const subjectId = req.params.subjectId;
+  const networkObj = await network.connectToNetwork(req.decoded.user);
+  const queryStudents = await network.query(networkObj, 'GetStudentsBySubject', subjectId);
+  const queryScore = await network.query(networkObj, 'GetScoresBySubject', subjectId);
 
-      let listScore = JSON.parse(queryScore.msg);
-      let listStudents = JSON.parse(queryStudents.msg);
+  if (!queryStudents.success || !queryScore.success) {
+    return res.json({
+      success: false,
+      msg: 'Error when call chaincode'
+    });
+  }
 
-      listStudents.forEach((student) => {
-        if (listScore) {
-          listScore.forEach((score) => {
-            if (score.StudentUsername === student.Username) {
-              student['ScoreValue'] = score.ScoreValue;
-            }
-          });
-        } else {
-          student['ScoreValue'] = null;
+  let listScore = JSON.parse(queryScore.msg);
+  let listStudents = JSON.parse(queryStudents.msg);
+
+  listStudents.forEach((student) => {
+    if (listScore) {
+      listScore.forEach((score) => {
+        if (score.StudentUsername === student.Username) {
+          student['ScoreValue'] = score.ScoreValue;
         }
       });
-      return res.json({
-        success: true,
-        students: listStudents
-      });
+    } else {
+      student['ScoreValue'] = null;
     }
+  });
+  return res.json({
+    success: true,
+    students: listStudents
   });
 });
 

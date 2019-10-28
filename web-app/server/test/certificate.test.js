@@ -207,6 +207,21 @@ describe('Route : /certificate', () => {
         });
     });
 
+    it('do not succes create certificate with req.body.studentUsername and req.body.subjectId is null', (done) => {
+      findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_ACADEMY });
+      request(app)
+        .post('/certificate/create')
+        .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+        .send({
+          subjectId: '',
+          studentUsername: ''
+        })
+        .then((res) => {
+          expect(res.status).equal(422);
+          done();
+        });
+    });
+
     it('do not succes create certificate because createCertificate error', (done) => {
       findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_ACADEMY });
       createCertStub.returns({
@@ -583,30 +598,12 @@ describe('Route : /certificate', () => {
         });
     });
 
-    it('do not success verify because error findOne username in database', (done) => {
-      findOneUserStub
-        .onFirstCall()
-        .yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_STUDENT });
-
-      findOneUserStub.onSecondCall().yields('error connect to database', null);
-      request(app)
-        .get(`/certificate/${certID}/verify`)
-        .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
-        .then((res) => {
-          expect(res.body.success).equal(false);
-          expect(res.body.msg).equal('error connect to database');
-          done();
-        });
-    });
-
     it('do not success verify because error findOne certificate in database', (done) => {
-      findOneUserStub
-        .onFirstCall()
-        .yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
+      findOneUserStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
 
-      findOneUserStub
-        .onSecondCall()
-        .yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
+      // findOneUserStub
+      //   .onSecondCall()
+      //   .yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
 
       findOneCertStub.yields('error to find cert', null);
 
@@ -621,13 +618,11 @@ describe('Route : /certificate', () => {
     });
 
     it('do not success verify because error certificate is not exists in database', (done) => {
-      findOneUserStub
-        .onFirstCall()
-        .yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
+      findOneUserStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
 
-      findOneUserStub
-        .onSecondCall()
-        .yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
+      // findOneUserStub
+      //   .onSecondCall()
+      //   .yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
 
       findOneCertStub.yields(undefined, null);
 

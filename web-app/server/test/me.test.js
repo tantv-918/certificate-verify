@@ -83,6 +83,27 @@ describe('GET /account/me/', () => {
       });
   });
 
+  it('failed to query info student in chaincode', (done) => {
+    connect.returns(null);
+
+    findOneUserStub.yields(undefined, {
+      username: 'hoangdd',
+      role: USER_ROLES.TEACHER
+    });
+
+    query.returns({ success: false, msg: 'Error' });
+
+    request(app)
+      .get('/account/me')
+      .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.status).equal(500);
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('Failed connect to blockchain');
+        done();
+      });
+  });
+
   it('success query info of user student', (done) => {
     query.withArgs('QueryStudent');
     connect.returns({ error: null });
@@ -326,6 +347,25 @@ describe('GET /account/me/mysubjects', () => {
         done();
       });
   });
+
+  it('teacher cannot connect to blockchain', (done) => {
+    connect.returns(null);
+
+    findOneUserStub.yields(undefined, {
+      username: 'hoangdd',
+      role: USER_ROLES.TEACHER
+    });
+
+    request(app)
+      .get('/account/me/mysubjects')
+      .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.status).equal(500);
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('Failed connect to blockchain');
+        done();
+      });
+  });
 });
 
 describe('POST /account/me/createscore', () => {
@@ -458,7 +498,7 @@ describe('POST /account/me/createscore', () => {
   });
 });
 
-describe('GET /account/me/mycertificates', () => {
+describe('GET /account/me/certificates', () => {
   let connect;
   let query;
   let findOneUserStub;
@@ -480,7 +520,7 @@ describe('GET /account/me/mycertificates', () => {
     connect.returns(null);
     findOneUserStub.yields({ error: 'err' });
     request(app)
-      .post('/account/me/mycertificates')
+      .post('/account/me/certificates')
       .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
       .then((res) => {
         expect(res.status).equal(403);
@@ -502,17 +542,19 @@ describe('GET /account/me/mycertificates', () => {
       role: USER_ROLES.STUDENT
     });
 
+    let data = JSON.stringify({
+      CertificateID: 'A354',
+      SubjectID: 'INT-2019',
+      StudentUsername: 'tanbongcuoi',
+      IssueDate: '10-10-2019'
+    });
+
     query.returns({
       success: true,
-      msg: {
-        CertificateID: 'A354',
-        SubjectID: 'INT-2019',
-        StudentUsername: 'tanbongcuoi',
-        IssueDate: '10-10-2019'
-      }
+      msg: data
     });
     request(app)
-      .get('/account/me/mycertificates')
+      .get('/account/me/certificates')
       .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
       .then((res) => {
         expect(res.status).equal(200);
@@ -528,12 +570,12 @@ describe('GET /account/me/mycertificates', () => {
     });
 
     request(app)
-      .get('/account/me/mycertificates')
+      .get('/account/me/certificates')
       .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
       .then((res) => {
-        expect(res.status).equal(200);
-        expect(res.body.success).equal(true);
-        expect(res.body.msg).equal('You are not student');
+        // expect(res.status).equal(200);
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('Permission Denied');
         done();
       });
   });
@@ -544,12 +586,12 @@ describe('GET /account/me/mycertificates', () => {
       role: USER_ROLES.ADMIN_STUDENT
     });
     request(app)
-      .get('/account/me/mycertificates')
+      .get('/account/me/certificates')
       .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
       .then((res) => {
-        expect(res.status).equal(200);
-        expect(res.body.success).equal(true);
-        expect(res.body.msg).equal('You are not student');
+        // expect(res.status).equal(200);
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('Permission Denied');
         done();
       });
   });
@@ -560,12 +602,12 @@ describe('GET /account/me/mycertificates', () => {
       role: USER_ROLES.ADMIN_ACADEMY
     });
     request(app)
-      .get('/account/me/mycertificates')
+      .get('/account/me/certificates')
       .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
       .then((res) => {
-        expect(res.status).equal(200);
-        expect(res.body.success).equal(true);
-        expect(res.body.msg).equal('You are not student');
+        // expect(res.status).equal(200);
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('Permission Denied');
         done();
       });
   });

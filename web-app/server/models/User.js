@@ -7,14 +7,15 @@ const UserSchema = new Schema({
     type: String,
     trim: true,
     lowercase: true,
-    unique: true,
-    required: [true, "can't be blank"],
     match: [/^[a-zA-Z0-9]+$/, 'is invalid']
   },
-  password: {
-    type: String,
-    required: [true, "can't be blank"]
+  fullname: {
+    type: String
   },
+  password: {
+    type: String
+  },
+  oauthType: Number,
   role: Number
 });
 

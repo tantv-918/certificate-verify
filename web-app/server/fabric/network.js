@@ -29,12 +29,14 @@ exports.connectToNetwork = async function(user, cli = false) {
       let response = {};
       response.error =
         'An identity for the user ' +
-        username +
+        identity +
         ' does not exist in the wallet. Register ' +
-        username +
+        identity +
         ' first';
       return response;
     }
+
+    let identity = user.username;
 
     const ccpPath = path.resolve(
       __dirname,
@@ -49,7 +51,7 @@ exports.connectToNetwork = async function(user, cli = false) {
     }
 
     const wallet = new FileSystemWallet(walletPath);
-    const userExists = await wallet.exists(user.username);
+    const userExists = await wallet.exists(identity);
 
     let networkObj;
 
@@ -57,9 +59,9 @@ exports.connectToNetwork = async function(user, cli = false) {
       let response = {};
       response.error =
         'An identity for the user ' +
-        username +
+        identity +
         ' does not exist in the wallet. Register ' +
-        username +
+        identity +
         ' first';
       return response;
     } else {
@@ -67,7 +69,7 @@ exports.connectToNetwork = async function(user, cli = false) {
 
       await gateway.connect(ccpPath, {
         wallet: wallet,
-        identity: user.username,
+        identity: identity,
         discovery: { enabled: true, asLocalhost: true }
       });
 
@@ -114,56 +116,6 @@ exports.query = async function(networkObj, func, args) {
       response.success = true;
       return response;
     }
-  } catch (error) {
-    response.success = false;
-    response.msg = error;
-    return response;
-  }
-};
-
-exports.queryUserSubjects = async function(networkObj) {
-  let response = {
-    success: false,
-    msg: ''
-  };
-  try {
-    const user = networkObj.user;
-    let allSubjects = await networkObj.contract.evaluateTransaction('GetAllSubjects');
-    let userSubject = [];
-
-    if (!allSubjects) {
-      response.success = false;
-      response.msg = error;
-      return response;
-    } else if (user.role === USER_ROLES.STUDENT) {
-      let student = await networkObj.contract.evaluateTransaction('QueryStudent', user.username);
-      let subjectIdStudent = student.Subjects;
-
-      for (let i = 0; i < subjectIdStudent.length; i++) {
-        for (let k = 0; k < allSubjects.length; k++) {
-          if (subjectIdStudent[i] === allSubjects[k].SubjectID) {
-            userSubject.push(allSubjects[k]);
-          }
-        }
-      }
-    } else if (user.role === USER_ROLES.TEACHER) {
-      let teacher = await networkObj.contract.evaluateTransaction('QueryTeacher', user.username);
-      let subjectIdTeacher = teacher.Subjects;
-
-      for (let i = 0; i < subjectIdTeacher.length; i++) {
-        for (let k = 0; k < allSubjects.length; k++) {
-          if (subjectIdTeacher[i] === allSubjects[k].SubjectID) {
-            userSubject.push(allSubjects[k]);
-          }
-        }
-      }
-    }
-
-    reponse = {
-      success: true,
-      msg: userSubject
-    };
-    return response;
   } catch (error) {
     response.success = false;
     response.msg = error;
@@ -233,6 +185,7 @@ exports.registerTeacherOnBlockchain = async function(networkObj, createdUser) {
     let teacher = new User({
       username: createdUser.username,
       password: process.env.TEACHER_DEFAULT_PASSWORD,
+      fullname: createdUser.fullname,
       role: USER_ROLES.TEACHER
     });
 
@@ -281,12 +234,7 @@ exports.registerTeacherOnBlockchain = async function(networkObj, createdUser) {
 };
 
 exports.registerStudentOnBlockchain = async function(createdUser) {
-  if (!createdUser.username) {
-    let response = {};
-    response.error = 'Error! You need to fill all fields before you can register!';
-    return response;
-  }
-
+  let identity = createdUser.username;
   var orgMSP = 'student';
   var nameMSP = 'Student';
 
@@ -300,10 +248,13 @@ exports.registerStudentOnBlockchain = async function(createdUser) {
     const walletPath = path.join(process.cwd(), `/cli/wallet-${orgMSP}`);
     const wallet = new FileSystemWallet(walletPath);
 
-    const userExists = await wallet.exists(createdUser.username);
+    const userExists = await wallet.exists(identity);
     if (userExists) {
-      console.log(`An identity for the user ${createdUser.username} already exists in the wallet`);
-      return;
+      let response = {
+        success: false,
+        msg: 'User already exist!'
+      };
+      return response;
     }
 
     // Create a new gateway for connecting to our peer node.
@@ -320,11 +271,13 @@ exports.registerStudentOnBlockchain = async function(createdUser) {
     const network = await gateway.getNetwork('certificatechannel');
     const contract = await network.getContract('academy');
 
-    await contract.submitTransaction('CreateStudent', createdUser.username, createdUser.fullname);
+    await contract.submitTransaction('CreateStudent', identity, createdUser.fullname);
 
     let user = new User({
-      username: createdUser.username,
-      password: createdUser.password,
+      username: identity,
+      oauthType: createdUser.oauthType,
+      password: createdUser.password ? createdUser.password : '',
+      fullname: createdUser.fullname,
       role: USER_ROLES.STUDENT
     });
 
@@ -334,15 +287,15 @@ exports.registerStudentOnBlockchain = async function(createdUser) {
         const secret = await ca.register(
           {
             affiliation: '',
-            enrollmentID: user.username,
+            enrollmentID: identity,
             role: 'client',
-            attrs: [{ name: 'username', value: user.username, ecert: true }]
+            attrs: [{ name: 'username', value: identity, ecert: true }]
           },
           adminIdentity
         );
 
         const enrollment = await ca.enroll({
-          enrollmentID: user.username,
+          enrollmentID: identity,
           enrollmentSecret: secret
         });
 
@@ -352,7 +305,7 @@ exports.registerStudentOnBlockchain = async function(createdUser) {
           enrollment.key.toBytes()
         );
 
-        await wallet.import(user.username, userIdentity);
+        await wallet.import(identity, userIdentity);
       }
     });
 
@@ -394,7 +347,6 @@ exports.createSubject = async function(networkObj, subject) {
     await networkObj.gateway.disconnect();
     return response;
   } catch (error) {
-    console.error(`Failed to register!`);
     let response = {
       success: false,
       msg: error
@@ -425,7 +377,6 @@ exports.createScore = async function(networkObj, score) {
     await networkObj.gateway.disconnect();
     return response;
   } catch (error) {
-    console.error(`Failed to register!`);
     let response = {
       success: false,
       msg: error
@@ -479,7 +430,6 @@ exports.createCertificate = async function(networkObj, certificate) {
     await networkObj.gateway.disconnect();
     return response;
   } catch (error) {
-    console.error(`Failed to register!`);
     let response = {
       success: false,
       msg: error
@@ -509,7 +459,6 @@ exports.registerTeacherForSubject = async function(networkObj, subjectID, teache
     await networkObj.gateway.disconnect();
     return response;
   } catch (error) {
-    console.error(`Failed to register!`);
     let response = {
       success: false,
       msg: error
@@ -539,7 +488,6 @@ exports.registerStudentForSubject = async function(networkObj, subjectID, studen
     await networkObj.gateway.disconnect();
     return response;
   } catch (error) {
-    console.error(`Failed to register!`);
     let response = {
       success: false,
       msg: error

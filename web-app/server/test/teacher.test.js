@@ -252,7 +252,8 @@ describe('Route /account/teacher', () => {
           fullname: 'Tan Trinh'
         })
         .then((res) => {
-          expect(res.status).equal(500);
+          expect(res.body.success).equal(false);
+          expect(res.body.msg).equal('error query teacher');
           done();
         });
     });

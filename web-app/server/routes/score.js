@@ -29,27 +29,30 @@ router.get(
         status: 403
       });
     }
-    User.findOne(
-      { username: req.body.studentusername, role: USER_ROLES.STUDENT },
-      async (err, student) => {
-        if (err) throw next(err);
-        if (student) {
-          let score = [req.body.subjectId, student.username];
-          const networkObj = await network.connectToNetwork(req.decoded.user);
-          const response = await network.query(networkObj, score);
-          if (response.success) {
-            return res.json({
-              success: true,
-              msg: response.msg
-            });
-          }
+    let identity = req.body.studentUsername;
+    User.findOne({ username: identity, role: USER_ROLES.STUDENT }, async (err, student) => {
+      if (err) {
+        return res.json({
+          success: false,
+          msg: err
+        });
+      }
+      if (student) {
+        let score = [req.body.subjectId, identity];
+        const networkObj = await network.connectToNetwork(req.decoded.user);
+        const response = await network.query(networkObj, score);
+        if (!response.success) {
           return res.json({
             success: false,
             msg: response.msg
           });
         }
+        return res.json({
+          success: true,
+          msg: response.msg
+        });
       }
-    );
+    });
   }
 );
 
@@ -65,15 +68,15 @@ router.get('/all', async (req, res) => {
 
   const response = await network.query(networkObj, 'GetAllScores');
 
-  if (response.success) {
+  if (!response.success) {
     return res.json({
-      success: true,
-      scores: JSON.parse(response.msg)
+      success: false,
+      msg: response.msg.toString()
     });
   }
   return res.json({
-    success: false,
-    msg: response.msg.toString()
+    success: true,
+    scores: JSON.parse(response.msg)
   });
 });
 

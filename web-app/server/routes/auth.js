@@ -3,10 +3,13 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const { check, validationResult } = require('express-validator');
-let checkJWT = require('../middlewares/check-jwt');
-let secretJWT = require('../config/index').secret;
+let secretJWT = require('../configs/secret').secret;
 const USER_ROLES = require('../configs/constant').USER_ROLES;
 const network = require('../fabric/network');
+const passport = require('passport');
+const passportOauth = require('../configs/passport-oauth');
+const signJWT = require('../middlewares/sign-jwt');
+const OAUTH_TYPES = require('../configs/constant').OAUTH_TYPES;
 
 router.get('/', async (req, res) => {
   return res.json({
@@ -54,6 +57,7 @@ router.post(
       let createdUser = {
         username: req.body.username,
         password: req.body.password,
+        oauthType: OAUTH_TYPES.NO,
         fullname: req.body.fullname
       };
       const response = await network.registerStudentOnBlockchain(createdUser);
@@ -123,13 +127,38 @@ router.post(
 
       return res.json({
         success: true,
-        username: req.body.username,
-        user: user.name,
+        fullname: user.fullname,
         msg: 'Login success',
-        token: token,
-        role: user.role
+        token: token
       });
     });
+  }
+);
+
+router.get(
+  '/google',
+  passport.authenticate('google', {
+    session: false,
+    scope: ['profile', 'email']
+  })
+);
+
+router.get('/google/callback', passport.authenticate('google', { session: false }), (req, res) => {
+  signJWT.signToken(req, res);
+});
+
+router.get(
+  '/facebook',
+  passport.authenticate('facebook', {
+    session: false
+  })
+);
+
+router.get(
+  '/facebook/callback',
+  passport.authenticate('facebook', { session: false }),
+  (req, res) => {
+    signJWT.signToken(req, res);
   }
 );
 

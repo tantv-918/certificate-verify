@@ -46,7 +46,7 @@ router.post(
       });
     }
     User.findOne({ username: req.body.username }, async (err, existing) => {
-      if (err) throw next(err);
+      if (err) return res.json({ success: false, msg: 'error query teacher' });
       if (existing) {
         return res.json({
           success: false,
@@ -59,17 +59,17 @@ router.post(
       };
       const networkObj = await network.connectToNetwork(req.decoded.user);
       const response = await network.registerTeacherOnBlockchain(networkObj, createdUser);
-      const teachers = await network.query(networkObj, 'GetAllTeachers');
-      if (response.success && teachers.success) {
+      if (!response.success) {
         return res.json({
-          success: true,
-          msg: response.msg,
-          teachers: JSON.parse(teachers.msg)
+          success: false,
+          msg: response.msg
         });
       }
+      const teachers = await network.query(networkObj, 'GetAllTeachers');
       return res.json({
-        success: false,
-        msg: response.msg
+        success: true,
+        msg: response.msg,
+        teachers: JSON.parse(teachers.msg)
       });
     });
   }
@@ -85,15 +85,15 @@ router.get('/all', async (req, res, next) => {
   }
   const networkObj = await network.connectToNetwork(req.decoded.user);
   const response = await network.query(networkObj, 'GetAllTeachers');
-  if (response.success) {
+  if (!response.success) {
     return res.json({
-      success: true,
-      teachers: JSON.parse(response.msg)
+      success: false,
+      msg: response.msg.toString()
     });
   }
   return res.json({
-    success: false,
-    msg: response.msg.toString()
+    success: true,
+    teachers: JSON.parse(response.msg)
   });
 });
 
@@ -129,17 +129,17 @@ router.get(
       }
       const networkObj = await network.connectToNetwork(req.decoded.user);
       const response = await network.query(networkObj, 'QueryTeacher', username);
-      let subjects = await network.query(networkObj, 'GetSubjectsByTeacher', teacher.username);
-      if (response.success && subjects.success) {
+      let subjects = await network.query(networkObj, 'GetSubjectsByTeacher', username);
+      if (!response.success || !subjects.success) {
         return res.json({
-          success: true,
-          msg: response.msg.toString(),
-          subjects: JSON.parse(subjects.msg)
+          success: false,
+          msg: response.msg.toString()
         });
       }
       return res.json({
-        success: false,
-        msg: response.msg.toString()
+        success: true,
+        msg: response.msg.toString(),
+        subjects: JSON.parse(subjects.msg)
       });
     });
   }
@@ -154,7 +154,12 @@ router.get('/:username/subjects', async (req, res, next) => {
     });
   }
   await User.findOne({ username: req.params.username }, async (err, teacher) => {
-    if (err) throw err;
+    if (err) {
+      return res.json({
+        success: false,
+        msg: err
+      });
+    }
     if (!teacher) return res.json({ success: false, msg: 'teacher is not exists' });
 
     const networkObj = await network.connectToNetwork(req.decoded.user);
@@ -168,16 +173,16 @@ router.get('/:username/subjects', async (req, res, next) => {
       (subject) => subject.TeacherUsername === ''
     );
 
-    if (subjectsByTeacher.success && subjects.success) {
+    if (!subjectsByTeacher.success || !subjects.success) {
       return res.json({
-        success: true,
-        subjects: JSON.parse(subjectsByTeacher.msg),
-        subjectsNoTeacher: subjectsNoTeacher
+        success: false,
+        msg: subjectsByTeacher.msg.toString()
       });
     }
     return res.json({
-      success: false,
-      msg: subjectsByTeacher.msg.toString()
+      success: true,
+      subjects: JSON.parse(subjectsByTeacher.msg),
+      subjectsNoTeacher: subjectsNoTeacher
     });
   });
 });
