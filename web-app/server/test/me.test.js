@@ -76,7 +76,6 @@ describe('GET /account/me/', () => {
       .get('/account/me')
       .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
       .then((res) => {
-        expect(res.status).equal(200);
         expect(res.body.success).equal(false);
         expect(res.body.msg).equal('Error');
         done();
@@ -266,6 +265,53 @@ describe('GET /account/me/mysubjects', () => {
       .then((res) => {
         expect(res.status).equal(200);
         expect(res.body.success).equal(false);
+        done();
+      });
+  });
+
+  it('failed to query subject of user student in chaincode with role teacher', (done) => {
+    findOneUserStub.yields(undefined, {
+      username: 'hoangdd',
+      role: USER_ROLES.TEACHER
+    });
+
+    connect.returns({
+      contract: 'academy',
+      network: 'certificatechannel',
+      gateway: 'gateway',
+      user: { username: 'hoangdd', role: USER_ROLES.TEACHER }
+    });
+
+    let data = JSON.stringify({
+      error: 'Error Network'
+    });
+
+    getMySubjectStub.returns({
+      success: false,
+      msg: data
+    });
+
+    request(app)
+      .get('/account/me/mysubjects')
+      .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        done();
+      });
+  });
+
+  it('notify user has not subject', (done) => {
+    findOneUserStub.yields(undefined, {
+      username: 'hoangdd',
+      role: USER_ROLES.ADMIN_ACADEMY
+    });
+
+    request(app)
+      .get('/account/me/mysubjects')
+      .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(true);
+        expect(res.body.msg).equal('You do not have subject');
         done();
       });
   });
@@ -784,6 +830,7 @@ describe('GET /account/me/:subjectId/students', () => {
 
   it('success query students of subject', (done) => {
     findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.TEACHER });
+    connect.returns({ error: null });
     let students = JSON.stringify([{ username: 'tantrinh' }, { username: 'nghianv' }]);
     let scores = JSON.stringify([
       {
@@ -804,8 +851,9 @@ describe('GET /account/me/:subjectId/students', () => {
       });
   });
 
-  it('do not succes because failed to call GetStudentsBySubject function', (done) => {
+  it('do not success because failed to call GetStudentsBySubject function', (done) => {
     findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.TEACHER });
+    connect.returns({ error: null });
     let scores = JSON.stringify([
       {
         SubjectID: '7',

@@ -29,7 +29,8 @@ router.get(
         status: 403
       });
     }
-    let identity = req.body.studentUsername;
+    let identity = req.params.studentUsername;
+
     User.findOne({ username: identity, role: USER_ROLES.STUDENT }, async (err, student) => {
       if (err) {
         return res.json({
@@ -38,9 +39,9 @@ router.get(
         });
       }
       if (student) {
-        let score = [req.body.subjectId, identity];
+        let score = [req.params.subjectId, identity];
         const networkObj = await network.connectToNetwork(req.decoded.user);
-        const response = await network.query(networkObj, score);
+        const response = await network.query(networkObj, 'GetScoresBySubject', score);
         if (!response.success) {
           return res.json({
             success: false,
@@ -52,6 +53,11 @@ router.get(
           msg: response.msg
         });
       }
+
+      return res.json({
+        success: false,
+        msg: 'student is not exists'
+      });
     });
   }
 );
