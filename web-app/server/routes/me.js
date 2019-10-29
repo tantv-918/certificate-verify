@@ -121,7 +121,6 @@ router.get('/mysubjects', async (req, res) => {
 router.get('/subjects', async (req, res) => {
   const user = req.decoded.user;
 
-  // if (user.role === USER_ROLES.STUDENT) {
   const networkObj = await network.connectToNetwork(user);
 
   if (!networkObj) {

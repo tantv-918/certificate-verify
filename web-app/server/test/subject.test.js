@@ -105,6 +105,20 @@ describe('Routes /subject/create', () => {
       findOneStub.restore();
     });
 
+    it('do not create success subject with empty req.body', (done) => {
+      findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_STUDENT });
+      request(app)
+        .post('/subject/create')
+        .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
+        .send({
+          subjectname: ''
+        })
+        .then((res) => {
+          expect(res.body.success).equal(false);
+          done();
+        });
+    });
+
     it('do not create success subject with admin student', (done) => {
       findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_STUDENT });
       request(app)
@@ -166,6 +180,27 @@ describe('Routes /subject/create', () => {
         });
     });
 
+    it('do not create success subject with admin academy', (done) => {
+      findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_ACADEMY });
+
+      createSubjectStub.returns({
+        success: false,
+        msg: 'error'
+      });
+
+      request(app)
+        .post('/subject/create')
+        .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+        .send({
+          subjectname: 'blockchain'
+        })
+        .then((res) => {
+          expect(res.body.success).equal(false);
+          expect(res.body.msg).equal('error');
+          done();
+        });
+    });
+
     it('create success subject with admin academy', (done) => {
       findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_ACADEMY });
       let data = JSON.stringify(
@@ -206,76 +241,76 @@ describe('Routes /subject/create', () => {
         });
     });
   });
+});
 
-  describe('#GET /subject/all', () => {
-    let connect;
-    let query;
-    let findOneStub;
+describe('#GET /subject/all', () => {
+  let connect;
+  let query;
+  let findOneStub;
 
-    beforeEach(() => {
-      connect = sinon.stub(network, 'connectToNetwork');
-      query = sinon.stub(network, 'query');
-      findOneStub = sinon.stub(User, 'findOne');
+  beforeEach(() => {
+    connect = sinon.stub(network, 'connectToNetwork');
+    query = sinon.stub(network, 'query');
+    findOneStub = sinon.stub(User, 'findOne');
+  });
+
+  afterEach(() => {
+    connect.restore();
+    query.restore();
+    findOneStub.restore();
+  });
+
+  it('should return all subjects', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
+    let data = JSON.stringify(
+      {
+        SubjectID: '00',
+        Name: 'Blockchain',
+        TeacherUsername: 'GV00',
+        Students: ['Tan', 'Nghia']
+      },
+      {
+        SubjectID: '01',
+        Name: 'Sawtooth',
+        TeacherUsername: 'GV01',
+        Students: ['Tan', 'Nghia', 'Quang']
+      }
+    );
+
+    query.returns({
+      success: true,
+      msg: data
     });
 
-    afterEach(() => {
-      connect.restore();
-      query.restore();
-      findOneStub.restore();
-    });
-
-    it('should return all subjects', (done) => {
-      findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
-      let data = JSON.stringify(
-        {
-          SubjectID: '00',
-          Name: 'Blockchain',
-          TeacherUsername: 'GV00',
-          Students: ['Tan', 'Nghia']
-        },
-        {
-          SubjectID: '01',
-          Name: 'Sawtooth',
-          TeacherUsername: 'GV01',
-          Students: ['Tan', 'Nghia', 'Quang']
-        }
-      );
-
-      query.returns({
-        success: true,
-        msg: data
+    request(app)
+      .get('/subject/all')
+      .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
+      .expect(200)
+      .then((res) => {
+        expect(res.status).equal(200);
+        expect(res.body.success).equal(true);
+        done();
       });
+  });
 
-      request(app)
-        .get('/subject/all')
-        .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
-        .expect(200)
-        .then((res) => {
-          expect(res.status).equal(200);
-          expect(res.body.success).equal(true);
-          done();
-        });
+  it('fail get all subjects because error call chaincode', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
+    let data = JSON.stringify({
+      errorMsg: 'Stub error'
     });
 
-    it('fail get all subjects because error call chaincode', (done) => {
-      findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
-      let data = JSON.stringify({
-        errorMsg: 'Stub error'
-      });
-
-      query.returns({
-        success: false,
-        msg: data
-      });
-
-      request(app)
-        .get('/subject/all')
-        .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
-        .then((res) => {
-          expect(res.body.success).equal(false);
-          done();
-        });
+    query.returns({
+      success: false,
+      msg: data
     });
+
+    request(app)
+      .get('/subject/all')
+      .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        done();
+      });
   });
 });
 
@@ -473,6 +508,454 @@ describe('#GET /subject/:subjectId/certificates ', () => {
 
     request(app)
       .get(`/subject/${subjectId}/certificates`)
+      .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(true);
+        done();
+      });
+  });
+});
+
+describe('#GET /subject/all', () => {
+  let connect;
+  let query;
+  let findOneStub;
+
+  beforeEach(() => {
+    connect = sinon.stub(network, 'connectToNetwork');
+    query = sinon.stub(network, 'query');
+    findOneStub = sinon.stub(User, 'findOne');
+  });
+
+  afterEach(() => {
+    connect.restore();
+    query.restore();
+    findOneStub.restore();
+  });
+
+  it('should return all subjects', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
+    let data = JSON.stringify(
+      {
+        SubjectID: '00',
+        Name: 'Blockchain',
+        TeacherUsername: 'GV00',
+        Students: ['Tan', 'Nghia']
+      },
+      {
+        SubjectID: '01',
+        Name: 'Sawtooth',
+        TeacherUsername: 'GV01',
+        Students: ['Tan', 'Nghia', 'Quang']
+      }
+    );
+
+    query.returns({
+      success: true,
+      msg: data
+    });
+
+    request(app)
+      .get('/subject/all')
+      .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
+      .expect(200)
+      .then((res) => {
+        expect(res.status).equal(200);
+        expect(res.body.success).equal(true);
+        done();
+      });
+  });
+
+  it('fail get all subjects because error call chaincode', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
+    let data = JSON.stringify({
+      errorMsg: 'Stub error'
+    });
+
+    query.returns({
+      success: false,
+      msg: data
+    });
+
+    request(app)
+      .get('/subject/all')
+      .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        done();
+      });
+  });
+});
+
+describe('#POST /subject/addsubjectforteacher', () => {
+  let connect;
+  let registerForSubjectStub;
+  let query;
+  let findOneStub;
+
+  beforeEach(() => {
+    connect = sinon.stub(network, 'connectToNetwork');
+    registerForSubjectStub = sinon.stub(network, 'registerTeacherForSubject');
+    query = sinon.stub(network, 'query');
+    findOneStub = sinon.stub(User, 'findOne');
+  });
+
+  afterEach(() => {
+    connect.restore();
+    registerForSubjectStub.restore();
+    query.restore();
+    findOneStub.restore();
+  });
+
+  it('do not create success subject with empty req.body', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_ACADEMY });
+    request(app)
+      .post('/subject/addsubjectforteacher')
+      .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+      .then((res) => {
+        expect(res.status).equal(422);
+        done();
+      });
+  });
+
+  it('do not add success subject with admin student', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_STUDENT });
+    request(app)
+      .post('/subject/addsubjectforteacher')
+      .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
+      .send({
+        subjectId: '01',
+        teacherusername: 'tan'
+      })
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('Permission Denied');
+        done();
+      });
+  });
+
+  it('do not add success subject with teacher', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.TEACHER });
+    request(app)
+      .post('/subject/addsubjectforteacher')
+      .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
+      .send({
+        subjectId: '01',
+        teacherusername: 'tan'
+      })
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('Permission Denied');
+        done();
+      });
+  });
+
+  it('do not add success subject with student', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
+    request(app)
+      .post('/subject/addsubjectforteacher')
+      .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
+      .send({
+        subjectId: '01',
+        teacherusername: 'tan'
+      })
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('Permission Denied');
+        done();
+      });
+  });
+
+  it('error check jwt', (done) => {
+    findOneStub.yields({ error: 'can not check jwt' }, undefined);
+    request(app)
+      .post('/subject/addsubjectforteacher')
+      .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+      .send({
+        subjectId: '01',
+        teacherusername: 'tan'
+      })
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.status).equal(403);
+        done();
+      });
+  });
+
+  it('failed to register subject for teacher', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_ACADEMY });
+    registerForSubjectStub.returns({ success: false, msg: 'error' });
+    request(app)
+      .post('/subject/addsubjectforteacher')
+      .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+      .send({
+        subjectId: '01',
+        teacherusername: 'tan'
+      })
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('error');
+        done();
+      });
+  });
+
+  it('success add subject for teacher', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_ACADEMY });
+    registerForSubjectStub.returns({ success: true, msg: 'success' });
+    let data = JSON.stringify({ SubjectID: '01', TeacherUsername: 'tan' });
+    query.returns({ success: true, msg: data });
+    request(app)
+      .post('/subject/addsubjectforteacher')
+      .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+      .send({
+        subjectId: '01',
+        teacherusername: 'tan'
+      })
+      .then((res) => {
+        expect(res.body.success).equal(true);
+        done();
+      });
+  });
+});
+
+describe('#GET /subject/subjecjtsnoteacher', () => {
+  let connect;
+
+  let query;
+  let findOneStub;
+
+  beforeEach(() => {
+    connect = sinon.stub(network, 'connectToNetwork');
+    query = sinon.stub(network, 'query');
+    findOneStub = sinon.stub(User, 'findOne');
+  });
+
+  afterEach(() => {
+    connect.restore();
+    query.restore();
+    findOneStub.restore();
+  });
+
+  it('do not success with admin student', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_STUDENT });
+    request(app)
+      .get('/subject/subjecjtsnoteacher')
+      .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('Permission Denied');
+        done();
+      });
+  });
+
+  it('do not success with teacher', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.TEACHER });
+    request(app)
+      .get('/subject/subjecjtsnoteacher')
+      .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('Permission Denied');
+        done();
+      });
+  });
+
+  it('do not success with student', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
+    request(app)
+      .get('/subject/subjecjtsnoteacher')
+      .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('Permission Denied');
+        done();
+      });
+  });
+
+  it('error check jwt', (done) => {
+    findOneStub.yields({ error: 'can not check jwt' }, undefined);
+    request(app)
+      .get('/subject/subjecjtsnoteacher')
+      .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.status).equal(403);
+        done();
+      });
+  });
+
+  it('failed to query all subject', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_ACADEMY });
+    query.returns({ success: false, msg: 'error' });
+    request(app)
+      .get('/subject/subjecjtsnoteacher')
+      .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('error');
+        done();
+      });
+  });
+
+  it('success query and filter subject', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_ACADEMY });
+    let data = JSON.stringify([{ subjectId: '01' }, { subjectId: '02' }]);
+    query.returns({ success: true, msg: data });
+    request(app)
+      .get('/subject/subjecjtsnoteacher')
+      .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(true);
+        done();
+      });
+  });
+});
+
+describe('#GET /subject/:subjectId/students', () => {
+  let connect;
+
+  let query;
+  let findOneStub;
+
+  beforeEach(() => {
+    connect = sinon.stub(network, 'connectToNetwork');
+    query = sinon.stub(network, 'query');
+    findOneStub = sinon.stub(User, 'findOne');
+  });
+
+  afterEach(() => {
+    connect.restore();
+    query.restore();
+    findOneStub.restore();
+  });
+
+  it('error check jwt', (done) => {
+    findOneStub.yields({ error: 'can not check jwt' }, undefined);
+    request(app)
+      .get('/subject/INT2002/students')
+      .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.status).equal(403);
+        done();
+      });
+  });
+
+  it('failed to query all subject', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_ACADEMY });
+    query.returns({ success: false, msg: 'error' });
+    request(app)
+      .get('/subject/INT2002/students')
+      .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('error');
+        done();
+      });
+  });
+
+  it('success query and filter subject', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_ACADEMY });
+    let data = JSON.stringify({ studentUsername: 'tan' }, { studentUsername: 'nghia' });
+    query.returns({ success: true, msg: data });
+    request(app)
+      .get('/subject/INT2002/students')
+      .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(true);
+        done();
+      });
+  });
+});
+
+describe('#GET /subject/:subjectId/scores', () => {
+  let connect;
+
+  let query;
+  let findOneStub;
+
+  beforeEach(() => {
+    connect = sinon.stub(network, 'connectToNetwork');
+    query = sinon.stub(network, 'query');
+    findOneStub = sinon.stub(User, 'findOne');
+  });
+
+  afterEach(() => {
+    connect.restore();
+    query.restore();
+    findOneStub.restore();
+  });
+
+  it('do not success with admin student', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_STUDENT });
+    request(app)
+      .get('/subject/INT2002/scores')
+      .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('Permission Denied');
+        done();
+      });
+  });
+
+  it('do not success with teacher', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.TEACHER });
+    request(app)
+      .get('/subject/INT2002/scores')
+      .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('Permission Denied');
+        done();
+      });
+  });
+
+  it('do not success with student', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
+    request(app)
+      .get('/subject/INT2002/scores')
+      .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('Permission Denied');
+        done();
+      });
+  });
+
+  it('error check jwt', (done) => {
+    findOneStub.yields({ error: 'can not check jwt' }, undefined);
+    request(app)
+      .get('/subject/INT2002/scores')
+      .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.status).equal(403);
+        done();
+      });
+  });
+
+  it('failed to query all subject', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_ACADEMY });
+    query.returns({ success: false, msg: 'error' });
+    request(app)
+      .get('/subject/INT2002/scores')
+      .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
+      .then((res) => {
+        expect(res.body.success).equal(false);
+        expect(res.body.msg).equal('error');
+        done();
+      });
+  });
+
+  it('success query and filter subject', (done) => {
+    findOneStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.ADMIN_ACADEMY });
+    let data = JSON.stringify([
+      { subjectId: 'INT2002', scoreValue: 9.0, studentUsername: 'tan' },
+      { subjectId: 'INT2002', scoreValue: 8.0, studentUsername: 'nghia' }
+    ]);
+    query.returns({ success: true, msg: data });
+    request(app)
+      .get('/subject/INT2002/scores')
       .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
       .then((res) => {
         expect(res.body.success).equal(true);
