@@ -64,12 +64,7 @@ async function main() {
 
     let nameMSP = await changeCaseFirstLetter(orgMSP);
 
-    const ccpPath = path.resolve(
-      __dirname,
-      '../../..',
-      'certificate-network',
-      `connection-${orgMSP}.json`
-    );
+    const ccpPath = path.resolve(__dirname, '../..', 'network', `connection-${orgMSP}.json`);
 
     // Create a new file system based wallet for managing identities.
     const walletPath = path.join(process.cwd(), `wallet-${orgMSP}`);

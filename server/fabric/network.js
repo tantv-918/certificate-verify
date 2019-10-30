@@ -38,12 +38,7 @@ exports.connectToNetwork = async function(user, cli = false) {
 
     let identity = user.username;
 
-    const ccpPath = path.resolve(
-      __dirname,
-      '../../..',
-      'certificate-network',
-      `connection-${orgMSP}.json`
-    );
+    const ccpPath = path.resolve(__dirname, '../..', 'network', `connection-${orgMSP}.json`);
     let walletPath = path.join(process.cwd(), `cli/wallet-${orgMSP}`);
 
     if (cli) {
@@ -157,12 +152,7 @@ exports.registerTeacherOnBlockchain = async function(networkObj, createdUser) {
   var nameMSP = 'Academy';
 
   try {
-    const ccpPath = path.resolve(
-      __dirname,
-      '../../..',
-      'certificate-network',
-      `connection-${orgMSP}.json`
-    );
+    const ccpPath = path.resolve(__dirname, '../..', 'network', `connection-${orgMSP}.json`);
     const walletPath = path.join(process.cwd(), `/cli/wallet-${orgMSP}`);
     const wallet = new FileSystemWallet(walletPath);
 
@@ -239,12 +229,7 @@ exports.registerStudentOnBlockchain = async function(createdUser) {
   var nameMSP = 'Student';
 
   try {
-    const ccpPath = path.resolve(
-      __dirname,
-      '../../..',
-      'certificate-network',
-      `connection-${orgMSP}.json`
-    );
+    const ccpPath = path.resolve(__dirname, '../..', 'network', `connection-${orgMSP}.json`);
     const walletPath = path.join(process.cwd(), `/cli/wallet-${orgMSP}`);
     const wallet = new FileSystemWallet(walletPath);
 
