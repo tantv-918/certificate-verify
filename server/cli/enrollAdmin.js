@@ -35,24 +35,14 @@ async function main() {
 
     let nameMSP = await changeCaseFirstLetter(orgMSP);
 
-    const ccpPath = path.resolve(
-      __dirname,
-      '../../..',
-      'certificate-network',
-      `connection-${orgMSP}.json`
-    );
+    const ccpPath = path.resolve(__dirname, '../..', 'network', `connection-${orgMSP}.json`);
 
     const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
     const ccp = JSON.parse(ccpJSON);
 
     // Create a new CA client for interacting with the CA.
     const caInfo = ccp.certificateAuthorities[`ca.${orgMSP}.certificate.com`];
-    const caTLSCACertsPath = path.resolve(
-      __dirname,
-      '../../..',
-      'certificate-network',
-      caInfo.tlsCACerts.path
-    );
+    const caTLSCACertsPath = path.resolve(__dirname, '../..', 'network', caInfo.tlsCACerts.path);
     const caTLSCACerts = fs.readFileSync(caTLSCACertsPath);
     const ca = new FabricCAServices(
       caInfo.url,
