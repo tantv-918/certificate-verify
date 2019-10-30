@@ -8,7 +8,7 @@ export const studentService = {
   getMyCertificates
 };
 
-async function getAllSubjects(username) {
+async function getAllSubjects() {
   try {
     let respone = await axios.get(`${process.env.VUE_APP_API_BACKEND}/account/me/subjects`, {
       headers: authHeader()
@@ -45,10 +45,10 @@ async function getMySubjects() {
 
 async function getMyCertificates() {
   try {
-    let respone = await axios.get(`${process.env.VUE_APP_API_BACKEND}/account/me/mycertificates`, {
+    let respone = await axios.get(`${process.env.VUE_APP_API_BACKEND}/account/me/certificates`, {
       headers: authHeader()
     });
-    return respone.data.subjects;
+    return respone.data.certificates;
   } catch (error) {
     throw error;
   }

@@ -26,7 +26,7 @@
                   <b-button
                     variant="success"
                     class="btn-confirm-certificate"
-                    :to="`/cert/${row.item.SubjectID}`"
+                    :to="`/cert/${row.item.CertificateID}`"
                   >Certificated</b-button>
                 </div>
               </template>

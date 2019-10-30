@@ -34,6 +34,20 @@
               </b-form-group>
             </ValidationProvider>
             <button type="submit" class="col-6 btnSubmit">Login</button>
+            <div class="float-right">
+              <ul class="social-network social-circle">
+                <li>
+                  <a :href="url_server+'/auth/facebook'" class="icoFacebook" title="Facebook">
+                    <i class="fab fa-facebook"></i>
+                  </a>
+                </li>
+                <li>
+                  <a :href="url_server+'/auth/google'" class="icoGoogle" title="Google">
+                    <i class="fab fa-google-plus-g"></i>
+                  </a>
+                </li>
+              </ul>
+            </div>
           </b-form>
         </ValidationObserver>
       </div>
@@ -67,7 +81,8 @@ export default {
       form: {
         username: "",
         password: ""
-      }
+      },
+      url_server: ""
     };
   },
   computed: {
@@ -77,7 +92,7 @@ export default {
     })
   },
   methods: {
-    ...mapActions("account", ["login"]),
+    ...mapActions("account", ["login", "loginGoogle"]),
     onSubmit(e) {
       e.preventDefault();
       const { username, password } = this.form;
@@ -88,6 +103,12 @@ export default {
     onReset() {
       this.form.username = "";
       this.form.password = "";
+    }
+  },
+  created() {
+    this.url_server = process.env.VUE_APP_API_BACKEND;
+    if (this.$route.query.code) {
+      this.loginGoogle(this.$route.query.code);
     }
   }
 };

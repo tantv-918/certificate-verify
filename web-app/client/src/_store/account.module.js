@@ -46,6 +46,18 @@ const actions = {
     authService.logout();
     commit('logout');
     router.push('/login');
+  },
+  loginGoogle({ dispatch, commit }, code) {
+    authService.loginGoogle(code).then(
+      (user) => {
+        commit('loginSuccess', user);
+        router.push('/home');
+      },
+      (error) => {
+        commit('loginFailure', error);
+        dispatch('alert/error', error, { root: true });
+      }
+    );
   }
 };
 

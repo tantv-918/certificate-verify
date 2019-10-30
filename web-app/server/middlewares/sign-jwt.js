@@ -14,6 +14,7 @@ exports.signToken = (req, res) => {
       success: true,
       msg: 'Login success',
       fullname: req.user.fullname,
+      role: USER_ROLES.STUDENT,
       token: token
     });
   });

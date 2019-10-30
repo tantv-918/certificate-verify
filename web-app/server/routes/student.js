@@ -17,15 +17,15 @@ router.get('/all', async (req, res) => {
 
   const response = await network.query(networkObj, 'GetAllStudents');
 
-  if (response.success) {
+  if (!response.success) {
     return res.json({
-      success: true,
-      students: JSON.parse(response.msg)
+      success: false,
+      msg: response.msg.toString()
     });
   }
   return res.json({
-    success: false,
-    msg: response.msg.toString()
+    success: true,
+    students: JSON.parse(response.msg)
   });
 });
 

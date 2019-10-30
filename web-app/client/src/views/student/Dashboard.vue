@@ -39,16 +39,10 @@
                   </b-button>
                   <b-button
                     variant="info"
-                    v-if="row.item.statusConfirm === STATUS_REGISTERED.REGISTERED"
+                    v-if="row.item.statusConfirm !== STATUS_REGISTERED.UNREGISTERED"
                     disabled="disabled"
                     class="btn-confirm-certificate"
                   >Registered</b-button>
-                  <b-button
-                    variant="success"
-                    v-if="row.item.statusConfirm === STATUS_REGISTERED.CERTIFICATED"
-                    class="btn-confirm-certificate"
-                    :to="`/cert/1`"
-                  >Certificated</b-button>
                 </div>
               </template>
             </b-table>
@@ -76,6 +70,7 @@ import { STATUS_REGISTERED } from "../../_helpers/constants";
 export default {
   data() {
     return {
+      STATUS_REGISTERED: STATUS_REGISTERED,
       form: {
         Name: ""
       },
