@@ -35,10 +35,9 @@ describe('Route /account/teacher', () => {
         .get('/account/teacher/all')
         .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
-          expect(res.body.status).equal(403);
+          expect(res.status).equal(403);
           done();
         });
     });
@@ -70,7 +69,7 @@ describe('Route /account/teacher', () => {
         .then((res) => {
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
-          expect(res.body.status).equal(403);
+          expect(res.status).equal(403);
           done();
         });
     });
@@ -83,6 +82,7 @@ describe('Route /account/teacher', () => {
         .then((res) => {
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
+          expect(res.status).equal(403);
           done();
         });
     });
@@ -134,6 +134,7 @@ describe('Route /account/teacher', () => {
           fullname: 'Tan Trinh'
         })
         .then((res) => {
+          expect(res.status).equal(409);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Teacher username is exist');
 
@@ -151,7 +152,7 @@ describe('Route /account/teacher', () => {
           fullname: 'Tan Trinh'
         })
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -203,6 +204,7 @@ describe('Route /account/teacher', () => {
           fullname: 'Tan Trinh'
         })
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -219,6 +221,7 @@ describe('Route /account/teacher', () => {
           fullname: 'Tan Trinh'
         })
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -252,6 +255,7 @@ describe('Route /account/teacher', () => {
           fullname: 'Tan Trinh'
         })
         .then((res) => {
+          expect(res.status).equal(500);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('error query teacher');
           done();
@@ -278,6 +282,7 @@ describe('Route /account/teacher', () => {
           fullname: 'Tan Trinh'
         })
         .then((res) => {
+          expect(res.status).equal(409);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Teacher username is exist');
           done();
@@ -290,9 +295,7 @@ describe('Route /account/teacher', () => {
         role: USER_ROLES.ADMIN_ACADEMY
       });
 
-      findOneStub
-        .onSecondCall()
-        .yields(undefined, { username: 'thienthangaycanhh', role: USER_ROLES.TEACHER });
+      findOneStub.onSecondCall().yields(undefined, null);
 
       connect.returns({ error: null });
 
@@ -310,7 +313,7 @@ describe('Route /account/teacher', () => {
         })
         .then((res) => {
           expect(res.body.success).equal(false);
-
+          expect(res.status).equal(500);
           done();
         });
     });
@@ -321,9 +324,7 @@ describe('Route /account/teacher', () => {
         role: USER_ROLES.ADMIN_ACADEMY
       });
 
-      findOneStub
-        .onSecondCall()
-        .yields(undefined, { username: 'thienthangaycanhh', role: USER_ROLES.TEACHER });
+      findOneStub.onSecondCall().yields(undefined, null);
 
       connect.returns({ error: null });
 
@@ -347,6 +348,8 @@ describe('Route /account/teacher', () => {
           fullname: 'Tan Trinh'
         })
         .then((res) => {
+          console.log(res.body);
+          expect(res.status).equal(500);
           expect(res.body.success).equal(false);
           done();
         });
@@ -377,7 +380,7 @@ describe('Route /account/teacher', () => {
         .get(`/account/teacher/${username}`)
         .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -390,6 +393,7 @@ describe('Route /account/teacher', () => {
         .get(`/account/teacher/${username}`)
         .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -402,6 +406,7 @@ describe('Route /account/teacher', () => {
         .get(`/account/teacher/${username}`)
         .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -431,6 +436,7 @@ describe('Route /account/teacher', () => {
         .get(`/account/teacher/${username}`)
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(500);
           expect(res.body.success).equal(false);
           done();
         });
@@ -450,6 +456,7 @@ describe('Route /account/teacher', () => {
         .get(`/account/teacher/${username}`)
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(404);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('teacher is not exists');
           done();
@@ -489,6 +496,7 @@ describe('Route /account/teacher', () => {
         .get(`/account/teacher/${username}`)
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(500);
           expect(res.body.success).equal(false);
           done();
         });
@@ -522,6 +530,7 @@ describe('Route /account/teacher', () => {
         .get(`/account/teacher/${username}`)
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(500);
           expect(res.body.success).equal(false);
           done();
         });
@@ -561,6 +570,7 @@ describe('Route /account/teacher', () => {
         .get(`/account/teacher/${username}`)
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(200);
           expect(res.body.success).equal(true);
           done();
         });
@@ -594,10 +604,9 @@ describe('Route /account/teacher', () => {
         .get(`/account/teacher/${username}/subjects`)
         .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
-          expect(res.body.status).equal(403);
+          expect(res.status).equal(403);
           done();
         });
     });
@@ -610,7 +619,7 @@ describe('Route /account/teacher', () => {
         .then((res) => {
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
-          expect(res.body.status).equal(403);
+          expect(res.status).equal(403);
           done();
         });
     });
@@ -623,7 +632,7 @@ describe('Route /account/teacher', () => {
         .then((res) => {
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
-          expect(res.body.status).equal(403);
+          expect(res.status).equal(403);
           done();
         });
     });

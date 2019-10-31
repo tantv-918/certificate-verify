@@ -19,21 +19,20 @@ router.get(
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({ errors: errors.array(), status: '422' });
+      return res.status(422).json({ success: false, errors: errors.array() });
     }
 
     if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-      return res.json({
+      return res.status(403).json({
         success: false,
-        msg: 'Permission Denied',
-        status: 403
+        msg: 'Permission Denied'
       });
     }
     let identity = req.params.studentUsername;
 
     User.findOne({ username: identity, role: USER_ROLES.STUDENT }, async (err, student) => {
       if (err) {
-        return res.json({
+        return res.status(500).json({
           success: false,
           msg: err
         });
@@ -43,7 +42,7 @@ router.get(
         const networkObj = await network.connectToNetwork(req.decoded.user);
         const response = await network.query(networkObj, 'GetScoresBySubject', score);
         if (!response.success) {
-          return res.json({
+          return res.status(500).json({
             success: false,
             msg: response.msg
           });
@@ -54,7 +53,7 @@ router.get(
         });
       }
 
-      return res.json({
+      return res.status(404).json({
         success: false,
         msg: 'student is not exists'
       });
@@ -64,10 +63,9 @@ router.get(
 
 router.get('/all', async (req, res) => {
   if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-    return res.json({
+    return res.status(403).json({
       success: false,
-      msg: 'Permission Denied',
-      status: 403
+      msg: 'Permission Denied'
     });
   }
   const networkObj = await network.connectToNetwork(req.decoded.user);
@@ -75,7 +73,7 @@ router.get('/all', async (req, res) => {
   const response = await network.query(networkObj, 'GetAllScores');
 
   if (!response.success) {
-    return res.json({
+    return res.status(500).json({
       success: false,
       msg: response.msg.toString()
     });

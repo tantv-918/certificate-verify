@@ -138,7 +138,6 @@ async function deleteTeacher(teacher) {
         teacher
       }
     });
-
     return respone.data.teachers;
   } catch (error) {
     throw error;

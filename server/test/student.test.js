@@ -34,7 +34,7 @@ describe('GET /account/student', () => {
         .get('/account/student/all')
         .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -66,6 +66,7 @@ describe('GET /account/student', () => {
         .get('/account/student/all')
         .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -78,6 +79,7 @@ describe('GET /account/student', () => {
         .get('/account/student/all')
         .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -120,7 +122,7 @@ describe('GET /account/student', () => {
         .get(`/account/student/${username}/subjects`)
         .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -152,6 +154,7 @@ describe('GET /account/student', () => {
         .get(`/account/student/${username}/subjects`)
         .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -164,6 +167,7 @@ describe('GET /account/student', () => {
         .get(`/account/student/${username}/subjects`)
         .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -228,6 +232,7 @@ describe('GET /account/student', () => {
         .get(`/account/student/${username}/subjects`)
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(404);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('student is not exists');
           done();
@@ -246,6 +251,7 @@ describe('GET /account/student', () => {
         .get(`/account/student/${username}/subjects`)
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(500);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('error query subjects of student');
           done();
@@ -276,7 +282,7 @@ describe('GET /account/student', () => {
         .get(`/account/student/${username}/certificates`)
         .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -308,6 +314,7 @@ describe('GET /account/student', () => {
         .get(`/account/student/${username}/certificates`)
         .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -320,6 +327,7 @@ describe('GET /account/student', () => {
         .get(`/account/student/${username}/certificates`)
         .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -386,6 +394,7 @@ describe('GET /account/student', () => {
         .get(`/account/student/${username}/certificates`)
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(404);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('student is not exists');
           done();
@@ -404,6 +413,7 @@ describe('GET /account/student', () => {
         .get(`/account/student/${username}/certificates`)
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(500);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('error query certificates of student');
           done();
@@ -434,7 +444,7 @@ describe('GET /account/student', () => {
         .get(`/account/student/${username}/scores`)
         .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -466,6 +476,7 @@ describe('GET /account/student', () => {
         .get(`/account/student/${username}/scores`)
         .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -478,6 +489,7 @@ describe('GET /account/student', () => {
         .get(`/account/student/${username}/scores`)
         .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -544,6 +556,7 @@ describe('GET /account/student', () => {
         .get(`/account/student/${username}/scores`)
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(404);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('student is not exists');
           done();
@@ -562,6 +575,7 @@ describe('GET /account/student', () => {
         .get(`/account/student/${username}/scores`)
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(500);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('error query scores of student');
           done();
