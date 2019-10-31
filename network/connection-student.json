@@ -22,7 +22,7 @@
     "peer0.student.certificate.com": {
       "url": "grpc://localhost:8051",
       "tlsCACerts": {
-        "path": "network/crypto-config/peerOrganizations/student.certificate.com/tlsca/tlsca.student.certificate.com-cert.pem"
+        "path": "crypto-config/peerOrganizations/student.certificate.com/tlsca/tlsca.student.certificate.com-cert.pem"
       },
       "grpcOptions": {
         "ssl-target-name-override": "peer0.student.certificate.com"
@@ -34,7 +34,7 @@
       "url": "http://localhost:8054",
       "caName": "ca.student.certificate.com",
       "tlsCACerts": {
-        "path": "network/crypto-config/peerOrganizations/student.certificate.com/tlsca/tlsca.student.certificate.com-cert.pem"
+        "path": "crypto-config/peerOrganizations/student.certificate.com/tlsca/tlsca.student.certificate.com-cert.pem"
       },
       "httpOptions": {
         "verify": false

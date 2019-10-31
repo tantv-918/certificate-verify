@@ -22,7 +22,7 @@
     "peer0.academy.certificate.com": {
       "url": "grpc://localhost:7051",
       "tlsCACerts": {
-        "path": "network/crypto-config/peerOrganizations/academy.certificate.com/tlsca/tlsca.academy.certificate.com-cert.pem"
+        "path": "crypto-config/peerOrganizations/academy.certificate.com/tlsca/tlsca.academy.certificate.com-cert.pem"
       },
       "grpcOptions": {
         "ssl-target-name-override": "peer0.academy.certificate.com"
@@ -34,7 +34,7 @@
       "url": "http://localhost:7054",
       "caName": "ca.academy.certificate.com",
       "tlsCACerts": {
-        "path": "network/crypto-config/peerOrganizations/academy.certificate.com/tlsca/tlsca.academy.certificate.com-cert.pem"
+        "path": "crypto-config/peerOrganizations/academy.certificate.com/tlsca/tlsca.academy.certificate.com-cert.pem"
       },
       "httpOptions": {
         "verify": false
