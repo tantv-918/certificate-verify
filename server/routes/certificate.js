@@ -11,10 +11,9 @@ require('dotenv').config();
 
 router.get('/create', checkJWT, async (req, res) => {
   if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-    return res.json({
+    return res.status(403).json({
       success: false,
-      msg: 'Permission Denied',
-      status: 403
+      msg: 'Permission Denied'
     });
   } else {
     res.json({
@@ -41,11 +40,11 @@ router.post(
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
+      return res.status(422).json({ success: true, errors: errors.array() });
     }
 
     if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-      return res.json({
+      return res.status(403).json({
         success: false,
         msg: 'Permission Denied'
       });
@@ -64,7 +63,7 @@ router.post(
     const response = await network.createCertificate(networkObj, certificate);
 
     if (!response.success) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         msg: response.msg
       });
@@ -82,7 +81,7 @@ router.post(
     );
 
     if (!queryCertificate.success || !queryScore.success || !queryStudent.success) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         msg: response.msg.toString()
       });
@@ -122,20 +121,20 @@ router.post(
 
 router.get('/all', checkJWT, async (req, res) => {
   if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-    return res.json({
+    return res.status(403).json({
       success: false,
       msg: 'Permission Denied'
     });
   }
   await Certificate.find(async (err, ceritificates) => {
     if (err) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         msg: err
       });
     }
     if (!ceritificates) {
-      return res.json({
+      return res.status(404).json({
         success: false,
         msg: 'do not have certificate'
       });
@@ -152,14 +151,14 @@ router.get('/:certId', async (req, res) => {
   var certId = req.params.certId;
   await Certificate.findOne({ certificateID: certId }, async (err, ceritificate) => {
     if (err) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         msg: err
       });
     }
 
     if (!ceritificate) {
-      return res.json({
+      return res.status(404).json({
         success: false,
         msg: 'certificate is not exists'
       });
@@ -177,14 +176,14 @@ router.get('/:certId/verify', checkJWT, async (req, res) => {
   var certId = req.params.certId;
   Certificate.findOne({ certificateID: certId }, async (err, ceritificate) => {
     if (err) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         msg: err
       });
     }
 
     if (!ceritificate) {
-      return res.json({
+      return res.status(404).json({
         success: false,
         msg: 'ceritificate is not exists'
       });
@@ -194,7 +193,7 @@ router.get('/:certId/verify', checkJWT, async (req, res) => {
     const response = await network.verifyCertificate(networkObj, ceritificate);
 
     if (!response.success) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         msg: response.msg.toString()
       });

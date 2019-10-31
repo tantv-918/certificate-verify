@@ -2,7 +2,6 @@ process.env.NODE_DEV = 'test';
 
 const expect = require('chai').expect;
 const request = require('supertest');
-const chai = require('chai');
 const Cert = require('../models/Certificate');
 const sinon = require('sinon');
 const network = require('../fabric/network');
@@ -36,7 +35,7 @@ describe('Route : /certificate', () => {
         .get('/certificate/create')
         .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -61,6 +60,7 @@ describe('Route : /certificate', () => {
         .get('/certificate/create')
         .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -73,6 +73,7 @@ describe('Route : /certificate', () => {
         .get('/certificate/create')
         .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -122,7 +123,7 @@ describe('Route : /certificate', () => {
           studentUsername: 'tantrinh'
         })
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -139,6 +140,7 @@ describe('Route : /certificate', () => {
           studentUsername: 'tantrinh'
         })
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -155,6 +157,7 @@ describe('Route : /certificate', () => {
           studentUsername: 'tantrinh'
         })
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -391,7 +394,7 @@ describe('Route : /certificate', () => {
       request(app)
         .get(`/certificate/${certId}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(500);
           expect(res.body.success).equal(false);
           done();
         });
@@ -402,7 +405,7 @@ describe('Route : /certificate', () => {
       request(app)
         .get(`/certificate/${certId}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(404);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('certificate is not exists');
           done();
@@ -459,7 +462,7 @@ describe('Route : /certificate', () => {
         .get(`/certificate/all`)
         .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -472,6 +475,7 @@ describe('Route : /certificate', () => {
         .get(`/certificate/all`)
         .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -484,6 +488,7 @@ describe('Route : /certificate', () => {
         .get(`/certificate/all`)
         .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -508,7 +513,7 @@ describe('Route : /certificate', () => {
         .get(`/certificate/all`)
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(500);
           expect(res.body.success).equal(false);
           done();
         });
@@ -521,7 +526,7 @@ describe('Route : /certificate', () => {
         .get(`/certificate/all`)
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(404);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('do not have certificate');
           done();
@@ -601,16 +606,13 @@ describe('Route : /certificate', () => {
     it('do not success verify because error findOne certificate in database', (done) => {
       findOneUserStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
 
-      // findOneUserStub
-      //   .onSecondCall()
-      //   .yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
-
       findOneCertStub.yields('error to find cert', null);
 
       request(app)
         .get(`/certificate/${certID}/verify`)
         .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(500);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('error to find cert');
           done();
@@ -620,16 +622,13 @@ describe('Route : /certificate', () => {
     it('do not success verify because error certificate is not exists in database', (done) => {
       findOneUserStub.yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
 
-      // findOneUserStub
-      //   .onSecondCall()
-      //   .yields(undefined, { username: 'hoangdd', role: USER_ROLES.STUDENT });
-
       findOneCertStub.yields(undefined, null);
 
       request(app)
         .get(`/certificate/${certID}/verify`)
         .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(404);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('ceritificate is not exists');
           done();

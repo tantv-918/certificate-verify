@@ -50,7 +50,7 @@ describe('GET /account/me/', () => {
       .get('/account/me')
       .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
       .then((res) => {
-        expect(res.status).equal(200);
+        expect(res.status).equal(500);
         expect(res.body.success).equal(false);
         expect(res.body.msg).equal('Failed connect to blockchain');
         done();
@@ -76,6 +76,7 @@ describe('GET /account/me/', () => {
       .get('/account/me')
       .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
       .then((res) => {
+        expect(res.status).equal(500);
         expect(res.body.success).equal(false);
         expect(res.body.msg).equal('Error');
         done();
@@ -96,7 +97,7 @@ describe('GET /account/me/', () => {
       .get('/account/me')
       .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
       .then((res) => {
-        expect(res.body.status).equal(500);
+        expect(res.status).equal(500);
         expect(res.body.success).equal(false);
         expect(res.body.msg).equal('Failed connect to blockchain');
         done();
@@ -230,7 +231,7 @@ describe('GET /account/me/mysubjects', () => {
       .get('/account/me/mysubjects')
       .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
       .then((res) => {
-        expect(res.status).equal(200);
+        expect(res.status).equal(500);
         expect(res.body.success).equal(false);
         expect(res.body.msg).equal('Failed connect to blockchain');
         done();
@@ -263,7 +264,7 @@ describe('GET /account/me/mysubjects', () => {
       .get('/account/me/mysubjects')
       .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
       .then((res) => {
-        expect(res.status).equal(200);
+        expect(res.status).equal(500);
         expect(res.body.success).equal(false);
         done();
       });
@@ -295,6 +296,7 @@ describe('GET /account/me/mysubjects', () => {
       .get('/account/me/mysubjects')
       .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
       .then((res) => {
+        expect(res.status).equal(500);
         expect(res.body.success).equal(false);
         done();
       });
@@ -310,6 +312,7 @@ describe('GET /account/me/mysubjects', () => {
       .get('/account/me/mysubjects')
       .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
       .then((res) => {
+        expect(res.status).equal(200);
         expect(res.body.success).equal(true);
         expect(res.body.msg).equal('You do not have subject');
         done();
@@ -406,7 +409,7 @@ describe('GET /account/me/mysubjects', () => {
       .get('/account/me/mysubjects')
       .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
       .then((res) => {
-        expect(res.body.status).equal(500);
+        expect(res.status).equal(500);
         expect(res.body.success).equal(false);
         expect(res.body.msg).equal('Failed connect to blockchain');
         done();
@@ -483,7 +486,7 @@ describe('POST /account/me/createscore', () => {
         scoreValue: ''
       })
       .then((res) => {
-        expect(res.body.status).equal(422);
+        expect(res.status).equal(422);
         expect(res.body.success).equal(false);
         done();
       });
@@ -501,7 +504,7 @@ describe('POST /account/me/createscore', () => {
         scoreValue: '9.0'
       })
       .then((res) => {
-        expect(res.body.status).equal(403);
+        expect(res.status).equal(403);
         expect(res.body.success).equal(false);
         done();
       });
@@ -519,7 +522,7 @@ describe('POST /account/me/createscore', () => {
         scoreValue: '9.0'
       })
       .then((res) => {
-        expect(res.body.status).equal(403);
+        expect(res.status).equal(403);
         expect(res.body.success).equal(false);
         done();
       });
@@ -537,7 +540,7 @@ describe('POST /account/me/createscore', () => {
         scoreValue: '9.0'
       })
       .then((res) => {
-        expect(res.body.status).equal(403);
+        expect(res.status).equal(403);
         expect(res.body.success).equal(false);
         done();
       });
@@ -717,7 +720,7 @@ describe('POST /account/me/registersubject', () => {
         subjectId: '12'
       })
       .then((res) => {
-        expect(res.body.status).equal(403);
+        expect(res.status).equal(403);
         expect(res.body.success).equal(false);
         done();
       });
@@ -733,7 +736,7 @@ describe('POST /account/me/registersubject', () => {
         subjectId: '12'
       })
       .then((res) => {
-        expect(res.body.status).equal(403);
+        expect(res.status).equal(403);
         expect(res.body.success).equal(false);
         done();
       });
@@ -749,7 +752,7 @@ describe('POST /account/me/registersubject', () => {
         subjectId: '12'
       })
       .then((res) => {
-        expect(res.body.status).equal(403);
+        expect(res.status).equal(403);
         expect(res.body.success).equal(false);
         done();
       });
@@ -867,7 +870,7 @@ describe('GET /account/me/:subjectId/students', () => {
       .get(`/account/me/${subjectID}/students`)
       .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
       .then((res) => {
-        expect(res.status).equal(200);
+        expect(res.status).equal(500);
         expect(res.body.success).equal(false);
         expect(res.body.msg).equal('Error when call chaincode');
         done();
@@ -884,7 +887,7 @@ describe('GET /account/me/:subjectId/students', () => {
       .get(`/account/me/${subjectID}/students`)
       .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
       .then((res) => {
-        expect(res.status).equal(200);
+        expect(res.status).equal(500);
         expect(res.body.success).equal(false);
         expect(res.body.msg).equal('Error when call chaincode');
         done();

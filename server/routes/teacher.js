@@ -6,9 +6,9 @@ const { check, validationResult, sanitizeParam } = require('express-validator');
 
 router.get('/create', async (req, res) => {
   if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-    return res.json({
+    return res.status(403).json({
       success: false,
-      msg: 'Failed'
+      msg: 'Permission Denied'
     });
   }
   return res.json({
@@ -35,20 +35,19 @@ router.post(
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({ success: false, errors: errors.array(), status: 422 });
+      return res.status(422).json({ success: false, errors: errors.array() });
     }
 
     if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-      return res.json({
+      return res.status(403).json({
         success: false,
-        msg: 'Permission Denied',
-        status: 403
+        msg: 'Permission Denied'
       });
     }
     User.findOne({ username: req.body.username }, async (err, existing) => {
-      if (err) return res.json({ success: false, msg: 'error query teacher' });
+      if (err) return res.status(500).json({ success: false, msg: 'error query teacher' });
       if (existing) {
-        return res.json({
+        return res.status(409).json({
           success: false,
           msg: 'Teacher username is exist'
         });
@@ -60,12 +59,20 @@ router.post(
       const networkObj = await network.connectToNetwork(req.decoded.user);
       const response = await network.registerTeacherOnBlockchain(networkObj, createdUser);
       if (!response.success) {
-        return res.json({
+        return res.status(500).json({
           success: false,
           msg: response.msg
         });
       }
       const teachers = await network.query(networkObj, 'GetAllTeachers');
+
+      if (!teachers.success) {
+        return res.status(500).json({
+          success: false,
+          msg: response.msg
+        });
+      }
+
       return res.json({
         success: true,
         msg: response.msg,
@@ -77,16 +84,15 @@ router.post(
 
 router.get('/all', async (req, res, next) => {
   if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-    return res.json({
+    return res.status(403).json({
       success: false,
-      msg: 'Permission Denied',
-      status: 403
+      msg: 'Permission Denied'
     });
   }
   const networkObj = await network.connectToNetwork(req.decoded.user);
   const response = await network.query(networkObj, 'GetAllTeachers');
   if (!response.success) {
-    return res.json({
+    return res.status(500).json({
       success: false,
       msg: response.msg.toString()
     });
@@ -106,23 +112,22 @@ router.get(
   ],
   async (req, res, next) => {
     if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-      return res.json({
+      return res.status(403).json({
         success: false,
-        msg: 'Permission Denied',
-        status: 403
+        msg: 'Permission Denied'
       });
     }
     var username = req.params.username;
 
     User.findOne({ username: username, role: USER_ROLES.TEACHER }, async (err, teacher) => {
       if (err) {
-        return res.json({
+        return res.status(500).json({
           success: false,
           msg: err
         });
       }
       if (!teacher) {
-        res.json({
+        res.status(404).json({
           success: false,
           msg: 'teacher is not exists'
         });
@@ -131,7 +136,7 @@ router.get(
       const response = await network.query(networkObj, 'QueryTeacher', username);
       let subjects = await network.query(networkObj, 'GetSubjectsByTeacher', username);
       if (!response.success || !subjects.success) {
-        return res.json({
+        return res.status(500).json({
           success: false,
           msg: response.msg.toString()
         });
@@ -147,20 +152,19 @@ router.get(
 
 router.get('/:username/subjects', async (req, res, next) => {
   if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-    return res.json({
+    return res.status(403).json({
       success: false,
-      msg: 'Permission Denied',
-      status: 403
+      msg: 'Permission Denied'
     });
   }
   await User.findOne({ username: req.params.username }, async (err, teacher) => {
     if (err) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         msg: err
       });
     }
-    if (!teacher) return res.json({ success: false, msg: 'teacher is not exists' });
+    if (!teacher) return res.status(404).json({ success: false, msg: 'teacher is not exists' });
 
     const networkObj = await network.connectToNetwork(req.decoded.user);
     let subjectsByTeacher = await network.query(
@@ -174,7 +178,7 @@ router.get('/:username/subjects', async (req, res, next) => {
     );
 
     if (!subjectsByTeacher.success || !subjects.success) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         msg: subjectsByTeacher.msg.toString()
       });

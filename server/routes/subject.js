@@ -9,10 +9,9 @@ const uuidv4 = require('uuid/v4');
 
 router.get('/create', async (req, res) => {
   if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-    res.json({
+    res.status(403).json({
       success: false,
-      msg: 'Permission Denied',
-      status: 403
+      msg: 'Permission Denied'
     });
   } else {
     res.json({
@@ -34,14 +33,13 @@ router.post(
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({ success: false, errors: errors.array(), status: 422 });
+      return res.status(422).json({ success: false, errors: errors.array() });
     }
 
     if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-      return res.json({
+      return res.status(403).json({
         success: false,
-        msg: 'Permission Denied',
-        status: 403
+        msg: 'Permission Denied'
       });
     }
     let subject = {
@@ -51,7 +49,7 @@ router.post(
     const networkObj = await network.connectToNetwork(req.decoded.user);
     const response = await network.createSubject(networkObj, subject);
     if (!response.success) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         msg: response.msg
       });
@@ -82,20 +80,19 @@ router.post(
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array(), status: '422' });
+      return res.status(422).json({ success: false, errors: errors.array() });
     }
 
     if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-      return res.json({
+      return res.status(403).json({
         success: false,
-        msg: 'Permission Denied',
-        status: 403
+        msg: 'Permission Denied'
       });
     }
     User.findOne(
       { username: req.body.teacherusername, role: USER_ROLES.TEACHER },
       async (err, teacher) => {
-        if (err) return res.json({ success: false, msg: 'error query teacher' });
+        if (err) return res.status(500).json({ success: false, msg: 'error query teacher' });
         if (teacher) {
           const networkObj = await network.connectToNetwork(req.decoded.user);
           const response = await network.registerTeacherForSubject(
@@ -104,7 +101,7 @@ router.post(
             req.body.teacherusername
           );
           if (!response.success) {
-            return res.json({
+            return res.status(500).json({
               success: false,
               msg: response.msg
             });
@@ -127,7 +124,7 @@ router.get('/all', async (req, res, next) => {
   const response = await network.query(networkObj, 'GetAllSubjects');
 
   if (!response.success) {
-    return res.json({
+    return res.status(500).json({
       success: false,
       msg: response.msg.toString()
     });
@@ -140,17 +137,16 @@ router.get('/all', async (req, res, next) => {
 
 router.get('/subjecjtsnoteacher', checkJWT, async (req, res, next) => {
   if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-    return res.json({
+    return res.status(403).json({
       success: false,
-      msg: 'Permission Denied',
-      status: 403
+      msg: 'Permission Denied'
     });
   }
   const networkObj = await network.connectToNetwork(req.decoded.user);
   let subjects = await network.query(networkObj, 'GetAllSubjects');
 
   if (!subjects.success) {
-    return res.json({
+    return res.status(500).json({
       success: false,
       msg: subjects.msg.toString()
     });
@@ -168,7 +164,7 @@ router.get('/:subjectId', async (req, res, next) => {
   const networkObj = await network.connectToNetwork(req.decoded.user);
   const response = await network.query(networkObj, 'QuerySubject', subjectID);
   if (!response.success) {
-    return res.json({
+    return res.status(500).json({
       success: false,
       msg: response.msg.toString()
     });
@@ -185,7 +181,7 @@ router.get('/:subjectId/students', checkJWT, async (req, res, next) => {
   const response = await network.query(networkObj, 'GetStudentsBySubject', subjectID);
 
   if (!response.success) {
-    return res.json({
+    return res.status(500).json({
       success: false,
       msg: response.msg.toString()
     });
@@ -198,10 +194,9 @@ router.get('/:subjectId/students', checkJWT, async (req, res, next) => {
 
 router.get('/:subjectId/scores', checkJWT, async (req, res, next) => {
   if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-    return res.json({
+    return res.status(403).json({
       success: false,
-      msg: 'Permission Denied',
-      status: 403
+      msg: 'Permission Denied'
     });
   }
 
@@ -210,7 +205,7 @@ router.get('/:subjectId/scores', checkJWT, async (req, res, next) => {
   const response = await network.query(networkObj, 'GetScoresBySubject', subjectId);
 
   if (!response.success) {
-    return res.json({
+    return res.status(500).json({
       success: false,
       msg: response.msg.toString()
     });
@@ -223,10 +218,9 @@ router.get('/:subjectId/scores', checkJWT, async (req, res, next) => {
 
 router.get('/:subjectId/certificates', async (req, res, next) => {
   if (req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY) {
-    return res.json({
+    return res.status(403).json({
       success: false,
-      msg: 'Permission Denied',
-      status: 403
+      msg: 'Permission Denied'
     });
   }
   const subjectId = req.params.subjectId;
@@ -236,7 +230,7 @@ router.get('/:subjectId/certificates', async (req, res, next) => {
   const queryStudent = await network.query(networkObj, 'GetStudentsBySubject', subjectId);
 
   if (!queryCertificate.success || !queryScore.success || !queryStudent.success) {
-    return res.json({
+    return res.status(500).json({
       success: false,
       msg: 'failed to call chaincode'
     });
