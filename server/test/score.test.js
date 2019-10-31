@@ -36,7 +36,7 @@ describe('Route : /score', () => {
         .get('/score/IT00/tan')
         .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -49,7 +49,7 @@ describe('Route : /score', () => {
         .get('/score/IT00/tan')
         .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -62,7 +62,7 @@ describe('Route : /score', () => {
         .get('/score/IT00/tan')
         .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -92,6 +92,7 @@ describe('Route : /score', () => {
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
           expect(res.body.success).equal(false);
+          expect(res.status).equal(403);
           done();
         });
     });
@@ -104,7 +105,7 @@ describe('Route : /score', () => {
         .get('/score/IT00/tan')
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
-          console.log(res.body);
+          expect(res.status).equal(500);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('error');
           done();
@@ -126,7 +127,7 @@ describe('Route : /score', () => {
         .get('/score/IT00/tan')
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
-          console.log(res.body);
+          expect(res.status).equal(200);
           expect(res.body.success).equal(true);
           done();
         });
@@ -156,7 +157,7 @@ describe('Route : /score', () => {
         .get('/score/all')
         .set('authorization', `${process.env.JWT_ADMIN_STUDENT_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -169,7 +170,7 @@ describe('Route : /score', () => {
         .get('/score/all')
         .set('authorization', `${process.env.JWT_STUDENT_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -182,7 +183,7 @@ describe('Route : /score', () => {
         .get('/score/all')
         .set('authorization', `${process.env.JWT_TEACHER_EXAMPLE}`)
         .then((res) => {
-          expect(res.status).equal(200);
+          expect(res.status).equal(403);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('Permission Denied');
           done();
@@ -208,6 +209,7 @@ describe('Route : /score', () => {
         .get('/score/all')
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(500);
           expect(res.body.success).equal(false);
           expect(res.body.msg).equal('error');
           done();
@@ -227,6 +229,7 @@ describe('Route : /score', () => {
         .get('/score/all')
         .set('authorization', `${process.env.JWT_ADMIN_ACADEMY_EXAMPLE}`)
         .then((res) => {
+          expect(res.status).equal(200);
           expect(res.body.success).equal(true);
           done();
         });

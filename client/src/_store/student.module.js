@@ -15,7 +15,7 @@ const actions = {
       commit('getAllSubjects', listSubjects);
     } catch (error) {
       console.log(error);
-      if ('403'.includes(error.message)) {
+      if (error.response.status === 403) {
         router.push('/403');
       }
     }
@@ -27,7 +27,7 @@ const actions = {
       location.reload(true);
     } catch (error) {
       console.log(error);
-      if ('403'.includes(error.message)) {
+      if (error.response.status === 403) {
         router.push('/403');
       }
     }
@@ -38,7 +38,7 @@ const actions = {
       commit('getMySubjects', mySubjects);
     } catch (error) {
       console.log(error);
-      if ('403'.includes(error.message)) {
+      if (error.response.status === 403) {
         router.push('/403');
       }
     }
@@ -49,7 +49,7 @@ const actions = {
       commit('getMyCertificates', myCertificates);
     } catch (error) {
       console.log(error);
-      if ('403'.includes(error.message)) {
+      if (error.response.status === 403) {
         router.push('/403');
       }
     }

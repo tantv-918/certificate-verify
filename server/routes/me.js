@@ -13,16 +13,15 @@ router.get('/', async (req, res) => {
     const networkObj = await network.connectToNetwork(user);
 
     if (!networkObj) {
-      return res.json({
+      return res.status(500).json({
         success: false,
-        msg: 'Failed connect to blockchain',
-        status: 500
+        msg: 'Failed connect to blockchain'
       });
     }
     let identity = user.username;
     const response = await network.query(networkObj, 'QueryStudent', identity);
     if (!response.success) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         msg: response.msg
       });
@@ -36,17 +35,16 @@ router.get('/', async (req, res) => {
     const networkObj = await network.connectToNetwork(user);
 
     if (!networkObj) {
-      return res.json({
+      return res.status(500).json({
         success: false,
-        msg: 'Failed connect to blockchain',
-        status: 500
+        msg: 'Failed connect to blockchain'
       });
     }
 
     const response = await network.query(networkObj, 'QueryTeacher', user.username);
 
     if (!response.success) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         msg: response.msg.toString()
       });
@@ -67,17 +65,16 @@ router.get('/mysubjects', async (req, res) => {
     const networkObj = await network.connectToNetwork(user);
 
     if (!networkObj) {
-      return res.json({
+      return res.status(500).json({
         success: false,
-        msg: 'Failed connect to blockchain',
-        status: 500
+        msg: 'Failed connect to blockchain'
       });
     }
 
     const response = await network.query(networkObj, 'GetMySubjects');
 
     if (!response.success) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         msg: response.msg.toString()
       });
@@ -91,17 +88,16 @@ router.get('/mysubjects', async (req, res) => {
     const networkObj = await network.connectToNetwork(user);
 
     if (!networkObj) {
-      return res.json({
+      return res.status(500).json({
         success: false,
-        msg: 'Failed connect to blockchain',
-        status: 500
+        msg: 'Failed connect to blockchain'
       });
     }
 
     const response = await network.query(networkObj, 'GetSubjectsByTeacher', user.username);
 
     if (!response.success) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         msg: response.msg.toString()
       });
@@ -123,10 +119,9 @@ router.get('/subjects', async (req, res) => {
   const networkObj = await network.connectToNetwork(user);
 
   if (!networkObj) {
-    return res.json({
+    return res.status(500).json({
       success: false,
-      msg: 'Failed connect to blockchain',
-      status: 500
+      msg: 'Failed connect to blockchain'
     });
   }
 
@@ -134,7 +129,7 @@ router.get('/subjects', async (req, res) => {
   const certs = await network.query(networkObj, 'GetMyCerts');
 
   if (!response.success || !certs.success) {
-    return res.json({
+    return res.status(500).json({
       success: false,
       msg: response.msg.toString()
     });
@@ -175,7 +170,7 @@ router.get(
   async (req, res) => {
     const user = req.decoded.user;
     if (user.role !== USER_ROLES.TEACHER) {
-      return res.json({
+      return res.status(403).json({
         success: false,
         msg: 'Permission Denied'
       });
@@ -185,17 +180,16 @@ router.get(
     var subjectID = req.params.subjectId;
 
     if (!networkObj) {
-      return res.json({
+      return res.status(500).json({
         success: false,
-        msg: 'Failed connect to blockchain',
-        status: 500
+        msg: 'Failed connect to blockchain'
       });
     }
 
     const response = await network.query(networkObj, 'GetScoresBySubjectOfTeacher', subjectID);
 
     if (!response.success) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         subjects: response.msg.toString()
       });
@@ -211,7 +205,7 @@ router.get('/certificates', async (req, res) => {
   const user = req.decoded.user;
 
   if (user.role !== USER_ROLES.STUDENT) {
-    return res.json({
+    return res.status(403).json({
       success: false,
       msg: 'Permission Denied'
     });
@@ -219,17 +213,16 @@ router.get('/certificates', async (req, res) => {
   const networkObj = await network.connectToNetwork(user);
 
   if (!networkObj) {
-    return res.json({
+    return res.status(500).json({
       success: false,
-      msg: 'Failed connect to blockchain',
-      status: 500
+      msg: 'Failed connect to blockchain'
     });
   }
 
   const response = await network.query(networkObj, 'GetMyCerts');
 
   if (!response.success) {
-    return res.json({
+    return res.status(500).json({
       success: false,
       msg: response.msg.toString()
     });
@@ -243,7 +236,7 @@ router.get('/certificates', async (req, res) => {
 router.get('/scores', async (req, res) => {
   const user = req.decoded.user;
   if (user.role !== USER_ROLES.STUDENT) {
-    return res.json({
+    return res.status(403).json({
       success: false,
       msg: 'Permission Denied'
     });
@@ -251,17 +244,16 @@ router.get('/scores', async (req, res) => {
   const networkObj = await network.connectToNetwork(user);
 
   if (!networkObj) {
-    return res.json({
+    return res.status(500).json({
       success: false,
-      msg: 'Failed connect to blockchain',
-      status: 500
+      msg: 'Failed connect to blockchain'
     });
   }
 
   const response = await network.query(networkObj, 'GetMyScores');
 
   if (!response.success) {
-    return res.json({
+    return res.status(500).json({
       success: false,
       msg: response.msg
     });
@@ -284,24 +276,22 @@ router.post(
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array(), status: '422' });
+      return res.status(422).json({ success: false, errors: errors.array() });
     }
 
     if (req.decoded.user.role !== USER_ROLES.STUDENT) {
-      return res.json({
+      return res.status(403).json({
         success: false,
-        msg: 'Permission Denied',
-        status: 403
+        msg: 'Permission Denied'
       });
     }
     let user = req.decoded.user;
     const networkObj = await network.connectToNetwork(user);
     let identity = user.username;
     if (identity === null) {
-      return res.json({
+      return res.status(403).json({
         success: false,
-        msg: 'Permission Denied',
-        status: 403
+        msg: 'Permission Denied'
       });
     }
     const response = await network.registerStudentForSubject(
@@ -310,7 +300,7 @@ router.post(
       identity
     );
     if (!response.success) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         msg: response.msg
       });
@@ -325,10 +315,9 @@ router.post(
 
 router.get('/createscore', async (req, res) => {
   if (req.decoded.user.role !== USER_ROLES.TEACHER) {
-    return res.json({
+    return res.status(403).json({
       success: false,
-      msg: 'Permission Denied',
-      status: 403
+      msg: 'Permission Denied'
     });
   }
   return res.json({
@@ -358,18 +347,22 @@ router.post(
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({ success: false, errors: errors.array(), status: 422 });
+      return res.status(422).json({ success: false, errors: errors.array() });
     }
     if (req.decoded.user.role !== USER_ROLES.TEACHER) {
-      return res.json({
+      return res.status(403).json({
         success: false,
-        msg: 'Permission Denied',
-        status: 403
+        msg: 'Permission Denied'
       });
     }
     let identity = req.body.studentUsername;
     User.findOne({ username: identity, role: USER_ROLES.STUDENT }, async (err, student) => {
-      if (err) throw next(err);
+      if (err) {
+        res.status(500).json({
+          success: false,
+          msg: err
+        });
+      }
       if (student) {
         let score = {
           subjectID: req.body.subjectId,
@@ -380,7 +373,7 @@ router.post(
         const response = await network.createScore(networkObj, score);
 
         if (!response.success) {
-          return res.json({
+          return res.status(500).json({
             success: false,
             msg: response.msg.toString()
           });
@@ -399,10 +392,9 @@ router.get('/:subjectId/students', checkJWT, async (req, res, next) => {
     req.decoded.user.role !== USER_ROLES.ADMIN_ACADEMY &&
     req.decoded.user.role !== USER_ROLES.TEACHER
   ) {
-    return res.json({
+    return res.status(403).json({
       success: false,
-      msg: 'Permission Denied',
-      status: 403
+      msg: 'Permission Denied'
     });
   }
 
@@ -412,7 +404,7 @@ router.get('/:subjectId/students', checkJWT, async (req, res, next) => {
   const queryScore = await network.query(networkObj, 'GetScoresBySubject', subjectId);
 
   if (!queryStudents.success || !queryScore.success) {
-    return res.json({
+    return res.status(500).json({
       success: false,
       msg: 'Error when call chaincode'
     });

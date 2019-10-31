@@ -107,7 +107,7 @@ async function deleteStudentOfSubject(subjectId, Username) {
   }
 }
 
-// Teacher Manager
+// -Teacher Manager
 async function getAllTeachers() {
   try {
     let respone = await axios.get(`${process.env.VUE_APP_API_BACKEND}/account/teacher/all`, {
@@ -138,7 +138,6 @@ async function deleteTeacher(teacher) {
         teacher
       }
     });
-
     return respone.data.teachers;
   } catch (error) {
     throw error;
