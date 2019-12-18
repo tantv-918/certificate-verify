@@ -1,0 +1,91 @@
+---
+name: first-network-student
+version: 1.0.0
+client:
+  organization: Student
+  connection:
+    timeout:
+      peer:
+        endorser: "300"
+organizations:
+  Student:
+    mspid: StudentMSP
+    peers:
+      - peer0.student.certificate.com
+      - peer1.student.certificate.com
+    certificateAuthorities:
+      - ca.student.certificate.com
+peers:
+  peer0.student.certificate.com:
+    url: grpcs://localhost:9051
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICdDCCAhugAwIBAgIQG4W/DqDTIvBGvfQXyImczzAKBggqhkjOPQQDAjCBhDEL
+        MAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNhbiBG
+        cmFuY2lzY28xIDAeBgNVBAoTF3N0dWRlbnQuY2VydGlmaWNhdGUuY29tMSYwJAYD
+        VQQDEx10bHNjYS5zdHVkZW50LmNlcnRpZmljYXRlLmNvbTAeFw0xOTEyMTgwMjE5
+        MDBaFw0yOTEyMTUwMjE5MDBaMIGEMQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2Fs
+        aWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZyYW5jaXNjbzEgMB4GA1UEChMXc3R1ZGVu
+        dC5jZXJ0aWZpY2F0ZS5jb20xJjAkBgNVBAMTHXRsc2NhLnN0dWRlbnQuY2VydGlm
+        aWNhdGUuY29tMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJfJkQGFKnGDWOhOl
+        oeRJb5klW1HsovsznHGKPEJO9cTuTFvwIwQizSWmnIV+8nmm2/Q8ZL+1Fd56VuOO
+        OTk/YKNtMGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggr
+        BgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCA/n2SD36B5kEZxVjjA
+        62W798nl5gZHN7h1rRDhZhfFOjAKBggqhkjOPQQDAgNHADBEAiBQPlcicr3sruvC
+        JkGhyYGBk7NFdwPlwuy1Tf2dxQYB/AIgL1QKcHAZR+k8Hv+MqPAWCXM2GMwEXLYa
+        bLYlk/8otN8=
+        -----END CERTIFICATE-----
+        
+    grpcOptions:
+      ssl-target-name-override: peer0.student.certificate.com
+      hostnameOverride: peer0.student.certificate.com
+  peer1.student.certificate.com:
+    url: grpcs://localhost:10051
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICdDCCAhugAwIBAgIQG4W/DqDTIvBGvfQXyImczzAKBggqhkjOPQQDAjCBhDEL
+        MAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNhbiBG
+        cmFuY2lzY28xIDAeBgNVBAoTF3N0dWRlbnQuY2VydGlmaWNhdGUuY29tMSYwJAYD
+        VQQDEx10bHNjYS5zdHVkZW50LmNlcnRpZmljYXRlLmNvbTAeFw0xOTEyMTgwMjE5
+        MDBaFw0yOTEyMTUwMjE5MDBaMIGEMQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2Fs
+        aWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZyYW5jaXNjbzEgMB4GA1UEChMXc3R1ZGVu
+        dC5jZXJ0aWZpY2F0ZS5jb20xJjAkBgNVBAMTHXRsc2NhLnN0dWRlbnQuY2VydGlm
+        aWNhdGUuY29tMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJfJkQGFKnGDWOhOl
+        oeRJb5klW1HsovsznHGKPEJO9cTuTFvwIwQizSWmnIV+8nmm2/Q8ZL+1Fd56VuOO
+        OTk/YKNtMGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggr
+        BgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCA/n2SD36B5kEZxVjjA
+        62W798nl5gZHN7h1rRDhZhfFOjAKBggqhkjOPQQDAgNHADBEAiBQPlcicr3sruvC
+        JkGhyYGBk7NFdwPlwuy1Tf2dxQYB/AIgL1QKcHAZR+k8Hv+MqPAWCXM2GMwEXLYa
+        bLYlk/8otN8=
+        -----END CERTIFICATE-----
+        
+    grpcOptions:
+      ssl-target-name-override: peer1.student.certificate.com
+      hostnameOverride: peer1.student.certificate.com
+certificateAuthorities:
+  ca.student.certificate.com:
+    url: https://localhost:8054
+    caName: ca.student.certificate.com
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICcDCCAhagAwIBAgIRAL2r4VLIHfKIcDvQB6O4+B8wCgYIKoZIzj0EAwIwgYEx
+        CzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1TYW4g
+        RnJhbmNpc2NvMSAwHgYDVQQKExdzdHVkZW50LmNlcnRpZmljYXRlLmNvbTEjMCEG
+        A1UEAxMaY2Euc3R1ZGVudC5jZXJ0aWZpY2F0ZS5jb20wHhcNMTkxMjE4MDIxOTAw
+        WhcNMjkxMjE1MDIxOTAwWjCBgTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlm
+        b3JuaWExFjAUBgNVBAcTDVNhbiBGcmFuY2lzY28xIDAeBgNVBAoTF3N0dWRlbnQu
+        Y2VydGlmaWNhdGUuY29tMSMwIQYDVQQDExpjYS5zdHVkZW50LmNlcnRpZmljYXRl
+        LmNvbTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABCfNTCf93MGZJYp1xD5g/K7t
+        04GJN+WoCwZErlRaAL9JH22y2+Sc2W4d/b/VK5SCoSGMip0tLDhKwwbcUzK+kjaj
+        bTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUH
+        AwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgwAEDRkrolvxvJxY/FFOViK6t
+        bvkdcG7pfL1svfi1c8YwCgYIKoZIzj0EAwIDSAAwRQIhAIkBOY/PpMC6nTM+53JW
+        5k0TjmZL4JACOKEtoGL7jxJEAiAno4xhFc6zOSf2vrJ6tGLS3m/dfvTlKA6ZM8V1
+        XWKXFw==
+        -----END CERTIFICATE-----
+        
+    httpOptions:
+      verify: false

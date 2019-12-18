@@ -1,44 +1,59 @@
-'use strict';
-const User = require('../models/User');
-const USER_ROLES = require('../configs/constant').USER_ROLES;
-const Certificate = require('../models/Certificate');
-const { FileSystemWallet, Gateway, X509WalletMixin } = require('fabric-network');
-const path = require('path');
-const mongoose = require('mongoose');
-require('dotenv').config();
+"use strict";
+const User = require("../models/User");
+const USER_ROLES = require("../configs/constant").USER_ROLES;
+const Certificate = require("../models/Certificate");
+const {
+  FileSystemWallet,
+  Gateway,
+  X509WalletMixin
+} = require("fabric-network");
+const path = require("path");
+const mongoose = require("mongoose");
+require("dotenv").config();
 
 // Connect database
 mongoose.connect(
   process.env.MONGODB_URI,
   { useUnifiedTopology: true, useNewUrlParser: true },
-  (error) => {
+  error => {
     if (error) console.log(error);
   }
 );
-mongoose.set('useCreateIndex', true);
+mongoose.set("useCreateIndex", true);
 
 exports.connectToNetwork = async function(user, cli = false) {
   try {
-    let orgMSP = 'student';
+    let orgMSP = "student";
 
-    if (user.role == USER_ROLES.ADMIN_ACADEMY || user.role == USER_ROLES.TEACHER) {
-      orgMSP = 'academy';
-    } else if (user.role == USER_ROLES.ADMIN_STUDENT || user.role == USER_ROLES.STUDENT) {
-      orgMSP = 'student';
+    if (
+      user.role == USER_ROLES.ADMIN_ACADEMY ||
+      user.role == USER_ROLES.TEACHER
+    ) {
+      orgMSP = "academy";
+    } else if (
+      user.role == USER_ROLES.ADMIN_STUDENT ||
+      user.role == USER_ROLES.STUDENT
+    ) {
+      orgMSP = "student";
     } else {
       let response = {};
       response.error =
-        'An identity for the user ' +
+        "An identity for the user " +
         identity +
-        ' does not exist in the wallet. Register ' +
+        " does not exist in the wallet. Register " +
         identity +
-        ' first';
+        " first";
       return response;
     }
 
     let identity = user.username;
 
-    const ccpPath = path.resolve(__dirname, '../..', 'network', `connection-${orgMSP}.json`);
+    const ccpPath = path.resolve(
+      __dirname,
+      "../..",
+      "first-network",
+      `connection-${orgMSP}.json`
+    );
     let walletPath = path.join(process.cwd(), `cli/wallet-${orgMSP}`);
 
     if (cli) {
@@ -53,11 +68,11 @@ exports.connectToNetwork = async function(user, cli = false) {
     if (!userExists) {
       let response = {};
       response.error =
-        'An identity for the user ' +
+        "An identity for the user " +
         identity +
-        ' does not exist in the wallet. Register ' +
+        " does not exist in the wallet. Register " +
         identity +
-        ' first';
+        " first";
       return response;
     } else {
       const gateway = new Gateway();
@@ -68,8 +83,8 @@ exports.connectToNetwork = async function(user, cli = false) {
         discovery: { enabled: true, asLocalhost: true }
       });
 
-      const network = await gateway.getNetwork('certificatechannel');
-      const contract = await network.getContract('academy');
+      const network = await gateway.getNetwork("certificatechannel");
+      const contract = await network.getContract("academy");
 
       networkObj = {
         contract: contract,
@@ -89,11 +104,14 @@ exports.connectToNetwork = async function(user, cli = false) {
 exports.query = async function(networkObj, func, args) {
   let response = {
     success: false,
-    msg: ''
+    msg: ""
   };
   try {
     if (Array.isArray(args)) {
-      response.msg = await networkObj.contract.evaluateTransaction(func, ...args);
+      response.msg = await networkObj.contract.evaluateTransaction(
+        func,
+        ...args
+      );
 
       await networkObj.gateway.disconnect();
       response.success = true;
@@ -121,11 +139,11 @@ exports.query = async function(networkObj, func, args) {
 exports.verifyCertificate = async function(networkObj, certificate) {
   let response = {
     success: false,
-    msg: ''
+    msg: ""
   };
   try {
     response.msg = await networkObj.contract.evaluateTransaction(
-      'VerifyCertificate',
+      "VerifyCertificate",
       certificate.certificateID,
       certificate.subjectID,
       certificate.username
@@ -144,21 +162,29 @@ exports.verifyCertificate = async function(networkObj, certificate) {
 exports.registerTeacherOnBlockchain = async function(networkObj, createdUser) {
   if (!createdUser.username) {
     let response = {};
-    response.error = 'Error! You need to fill all fields before you can register!';
+    response.error =
+      "Error! You need to fill all fields before you can register!";
     return response;
   }
 
-  var orgMSP = 'academy';
-  var nameMSP = 'Academy';
+  var orgMSP = "academy";
+  var nameMSP = "Academy";
 
   try {
-    const ccpPath = path.resolve(__dirname, '../..', 'network', `connection-${orgMSP}.json`);
+    const ccpPath = path.resolve(
+      __dirname,
+      "../..",
+      "network",
+      `connection-${orgMSP}.json`
+    );
     const walletPath = path.join(process.cwd(), `/cli/wallet-${orgMSP}`);
     const wallet = new FileSystemWallet(walletPath);
 
     const userExists = await wallet.exists(createdUser.username);
     if (userExists) {
-      console.log(`An identity for the user ${createdUser.username} already exists in the wallet`);
+      console.log(
+        `An identity for the user ${createdUser.username} already exists in the wallet`
+      );
       return;
     }
 
@@ -167,7 +193,7 @@ exports.registerTeacherOnBlockchain = async function(networkObj, createdUser) {
     const adminIdentity = await networkObj.gateway.getCurrentIdentity();
 
     await networkObj.contract.submitTransaction(
-      'CreateTeacher',
+      "CreateTeacher",
       createdUser.username,
       createdUser.fullname
     );
@@ -184,10 +210,10 @@ exports.registerTeacherOnBlockchain = async function(networkObj, createdUser) {
       if (user) {
         const secret = await ca.register(
           {
-            affiliation: '',
+            affiliation: "",
             enrollmentID: user.username,
-            role: 'client',
-            attrs: [{ name: 'username', value: user.username, ecert: true }]
+            role: "client",
+            attrs: [{ name: "username", value: user.username, ecert: true }]
           },
           adminIdentity
         );
@@ -208,7 +234,7 @@ exports.registerTeacherOnBlockchain = async function(networkObj, createdUser) {
     });
     let response = {
       success: true,
-      msg: 'Register success!'
+      msg: "Register success!"
     };
 
     await networkObj.gateway.disconnect();
@@ -225,11 +251,16 @@ exports.registerTeacherOnBlockchain = async function(networkObj, createdUser) {
 
 exports.registerStudentOnBlockchain = async function(createdUser) {
   let identity = createdUser.username;
-  var orgMSP = 'student';
-  var nameMSP = 'Student';
+  var orgMSP = "student";
+  var nameMSP = "Student";
 
   try {
-    const ccpPath = path.resolve(__dirname, '../..', 'network', `connection-${orgMSP}.json`);
+    const ccpPath = path.resolve(
+      __dirname,
+      "../..",
+      "network",
+      `connection-${orgMSP}.json`
+    );
     const walletPath = path.join(process.cwd(), `/cli/wallet-${orgMSP}`);
     const wallet = new FileSystemWallet(walletPath);
 
@@ -237,7 +268,7 @@ exports.registerStudentOnBlockchain = async function(createdUser) {
     if (userExists) {
       let response = {
         success: false,
-        msg: 'User already exist!'
+        msg: "User already exist!"
       };
       return response;
     }
@@ -253,15 +284,19 @@ exports.registerStudentOnBlockchain = async function(createdUser) {
     // Get the CA client object from the gateway for interacting with the CA.
     const ca = gateway.getClient().getCertificateAuthority();
     const adminIdentity = gateway.getCurrentIdentity();
-    const network = await gateway.getNetwork('certificatechannel');
-    const contract = await network.getContract('academy');
+    const network = await gateway.getNetwork("certificatechannel");
+    const contract = await network.getContract("academy");
 
-    await contract.submitTransaction('CreateStudent', identity, createdUser.fullname);
+    await contract.submitTransaction(
+      "CreateStudent",
+      identity,
+      createdUser.fullname
+    );
 
     let user = new User({
       username: identity,
       oauthType: createdUser.oauthType,
-      password: createdUser.password ? createdUser.password : '',
+      password: createdUser.password ? createdUser.password : "",
       fullname: createdUser.fullname,
       role: USER_ROLES.STUDENT
     });
@@ -271,10 +306,10 @@ exports.registerStudentOnBlockchain = async function(createdUser) {
       if (user) {
         const secret = await ca.register(
           {
-            affiliation: '',
+            affiliation: "",
             enrollmentID: identity,
-            role: 'client',
-            attrs: [{ name: 'username', value: identity, ecert: true }]
+            role: "client",
+            attrs: [{ name: "username", value: identity, ecert: true }]
           },
           adminIdentity
         );
@@ -296,7 +331,7 @@ exports.registerStudentOnBlockchain = async function(createdUser) {
 
     let response = {
       success: true,
-      msg: 'Register success!'
+      msg: "Register success!"
     };
 
     await gateway.disconnect();
@@ -314,19 +349,20 @@ exports.registerStudentOnBlockchain = async function(createdUser) {
 exports.createSubject = async function(networkObj, subject) {
   if (!subject.subjectID || !subject.subjectName) {
     let response = {};
-    response.error = 'Error! You need to fill all fields before you can register!';
+    response.error =
+      "Error! You need to fill all fields before you can register!";
     return response;
   }
 
   try {
     await networkObj.contract.submitTransaction(
-      'CreateSubject',
+      "CreateSubject",
       subject.subjectID,
       subject.subjectName
     );
     let response = {
       success: true,
-      msg: 'Create success!'
+      msg: "Create success!"
     };
 
     await networkObj.gateway.disconnect();
@@ -343,20 +379,21 @@ exports.createSubject = async function(networkObj, subject) {
 exports.createScore = async function(networkObj, score) {
   if (!score.subjectID || !score.studentUsername || !score.scoreValue) {
     let response = {};
-    response.error = 'Error! You need to fill all fields before you can register!';
+    response.error =
+      "Error! You need to fill all fields before you can register!";
     return response;
   }
 
   try {
     await networkObj.contract.submitTransaction(
-      'CreateScore',
+      "CreateScore",
       score.subjectID,
       score.studentUsername,
       score.scoreValue
     );
     let response = {
       success: true,
-      msg: 'Create success!'
+      msg: "Create success!"
     };
 
     await networkObj.gateway.disconnect();
@@ -378,13 +415,14 @@ exports.createCertificate = async function(networkObj, certificate) {
     !certificate.issueDate
   ) {
     let response = {};
-    response.error = 'Error! You need to fill all fields before you can register!';
+    response.error =
+      "Error! You need to fill all fields before you can register!";
     return response;
   }
 
   try {
     await networkObj.contract.submitTransaction(
-      'CreateCertificate',
+      "CreateCertificate",
       certificate.certificateID,
       certificate.subjectID,
       certificate.studentUsername,
@@ -409,7 +447,7 @@ exports.createCertificate = async function(networkObj, certificate) {
 
     let response = {
       success: true,
-      msg: 'Create success!'
+      msg: "Create success!"
     };
 
     await networkObj.gateway.disconnect();
@@ -423,22 +461,27 @@ exports.createCertificate = async function(networkObj, certificate) {
   }
 };
 
-exports.registerTeacherForSubject = async function(networkObj, subjectID, teacherUsername) {
+exports.registerTeacherForSubject = async function(
+  networkObj,
+  subjectID,
+  teacherUsername
+) {
   if (!subjectID || !teacherUsername) {
     let response = {};
-    response.error = 'Error! You need to fill all fields before you can register!';
+    response.error =
+      "Error! You need to fill all fields before you can register!";
     return response;
   }
 
   try {
     await networkObj.contract.submitTransaction(
-      'TeacherRegisterSubject',
+      "TeacherRegisterSubject",
       subjectID,
       teacherUsername
     );
     let response = {
       success: true,
-      msg: 'Create success!'
+      msg: "Create success!"
     };
 
     await networkObj.gateway.disconnect();
@@ -452,22 +495,27 @@ exports.registerTeacherForSubject = async function(networkObj, subjectID, teache
   }
 };
 
-exports.registerStudentForSubject = async function(networkObj, subjectID, studentUsername) {
+exports.registerStudentForSubject = async function(
+  networkObj,
+  subjectID,
+  studentUsername
+) {
   console.log(subjectID);
   if (!subjectID || !studentUsername) {
     let response = {};
-    response.error = 'Error! You need to fill all fields before you can register!';
+    response.error =
+      "Error! You need to fill all fields before you can register!";
     return response;
   }
   try {
     await networkObj.contract.submitTransaction(
-      'StudentRegisterSubject',
+      "StudentRegisterSubject",
       subjectID,
       studentUsername
     );
     let response = {
       success: true,
-      msg: 'Create success!'
+      msg: "Create success!"
     };
 
     await networkObj.gateway.disconnect();
@@ -482,7 +530,7 @@ exports.registerStudentForSubject = async function(networkObj, subjectID, studen
 };
 
 function changeCaseFirstLetter(params) {
-  if (typeof params === 'string') {
+  if (typeof params === "string") {
     return params.charAt(0).toUpperCase() + params.slice(1);
   }
   return null;

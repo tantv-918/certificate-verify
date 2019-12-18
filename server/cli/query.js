@@ -1,21 +1,21 @@
-'use strict';
+"use strict";
 
-const argv = require('yargs').argv;
-const path = require('path');
-const conn = require('../fabric/network');
-const User = require('../models/User');
-const mongoose = require('mongoose');
-require('dotenv').config();
+const argv = require("yargs").argv;
+const path = require("path");
+const conn = require("../fabric/network");
+const User = require("../models/User");
+const mongoose = require("mongoose");
+require("dotenv").config();
 
 // Connect database
 mongoose.connect(
   process.env.MONGODB_URI,
   { useUnifiedTopology: true, useNewUrlParser: true },
-  (error) => {
+  error => {
     if (error) console.log(error);
   }
 );
-mongoose.set('useCreateIndex', true);
+mongoose.set("useCreateIndex", true);
 
 /**
  * Query function of chaincode
@@ -41,14 +41,19 @@ async function main() {
       if (user) {
         const networkObj = await conn.connectToNetwork(user, true);
 
-        if (typeof args === 'object') {
+        if (typeof args === "object") {
           result = await networkObj.contract.evaluateTransaction(func, ...args);
         } else if (args) {
           args = args.toString();
           result = await networkObj.contract.evaluateTransaction(func, args);
+          console.log(
+            `Transaction has been evaluated, result is a: ${result.toString()}`
+          );
         } else {
           result = await networkObj.contract.evaluateTransaction(func);
-          console.log(`Transaction has been evaluated, result is a: ${result.toString()}`);
+          console.log(
+            `Transaction has been evaluated, result is a: ${result.toString()}`
+          );
         }
         process.exit(0);
       }

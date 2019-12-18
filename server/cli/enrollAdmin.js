@@ -1,24 +1,24 @@
-'use strict';
+"use strict";
 
-const FabricCAServices = require('fabric-ca-client');
-const { FileSystemWallet, X509WalletMixin } = require('fabric-network');
-const fs = require('fs');
-const path = require('path');
-const argv = require('yargs').argv;
-const User = require('../models/User');
-const USER_ROLES = require('../configs/constant').USER_ROLES;
-const mongoose = require('mongoose');
-require('dotenv').config();
+const FabricCAServices = require("fabric-ca-client");
+const { FileSystemWallet, X509WalletMixin } = require("fabric-network");
+const fs = require("fs");
+const path = require("path");
+const argv = require("yargs").argv;
+const User = require("../models/User");
+const USER_ROLES = require("../configs/constant").USER_ROLES;
+const mongoose = require("mongoose");
+require("dotenv").config();
 
 // Connect database
 mongoose.connect(
   process.env.MONGODB_URI,
   { useUnifiedTopology: true, useNewUrlParser: true },
-  (error) => {
+  error => {
     if (error) console.log(error);
   }
 );
-mongoose.set('useCreateIndex', true);
+mongoose.set("useCreateIndex", true);
 /**
  * Create admin for Org
  * @param  {String} orgMSP Org Name (default: student)
@@ -27,7 +27,7 @@ mongoose.set('useCreateIndex', true);
 
 async function main() {
   try {
-    let orgMSP = 'student';
+    let orgMSP = "student";
 
     if (argv.orgMSP) {
       orgMSP = argv.orgMSP.toString();
@@ -35,15 +35,19 @@ async function main() {
 
     let nameMSP = await changeCaseFirstLetter(orgMSP);
 
-    const ccpPath = path.resolve(__dirname, '../..', 'network', `connection-${orgMSP}.json`);
+    const ccpPath = path.resolve(
+      __dirname,
+      "../..",
+      "first-network",
+      `connection-${orgMSP}.json`
+    );
 
-    const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
+    const ccpJSON = fs.readFileSync(ccpPath, "utf8");
     const ccp = JSON.parse(ccpJSON);
 
     // Create a new CA client for interacting with the CA.
     const caInfo = ccp.certificateAuthorities[`ca.${orgMSP}.certificate.com`];
-    const caTLSCACertsPath = path.resolve(__dirname, '../..', 'network', caInfo.tlsCACerts.path);
-    const caTLSCACerts = fs.readFileSync(caTLSCACertsPath);
+    const caTLSCACerts = caInfo.tlsCACerts.pem;
     const ca = new FabricCAServices(
       caInfo.url,
       { trustedRoots: caTLSCACerts, verify: false },
@@ -65,14 +69,14 @@ async function main() {
 
     let user;
 
-    if (orgMSP === 'student') {
+    if (orgMSP === "student") {
       user = new User({
         username: process.env.ADMIN_STUDENT_USERNAME,
         password: process.env.ADMIN_STUDENT_PASSWORD,
         role: USER_ROLES.ADMIN_STUDENT
       });
     }
-    if (orgMSP === 'academy') {
+    if (orgMSP === "academy") {
       user = new User({
         username: process.env.ADMIN_ACADEMY_USERNAME,
         password: process.env.ADMIN_ACADEMY_PASSWORD,
@@ -85,8 +89,8 @@ async function main() {
       if (user) {
         // Enroll the admin user, and import the new identity into the wallet.
         const enrollment = await ca.enroll({
-          enrollmentID: 'admin',
-          enrollmentSecret: 'adminpw'
+          enrollmentID: "admin",
+          enrollmentSecret: "adminpw"
         });
         const identity = await X509WalletMixin.createIdentity(
           `${nameMSP}MSP`,
@@ -107,7 +111,7 @@ async function main() {
 }
 
 function changeCaseFirstLetter(params) {
-  if (typeof params === 'string') {
+  if (typeof params === "string") {
     return params.charAt(0).toUpperCase() + params.slice(1);
   }
   return null;

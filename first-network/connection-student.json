@@ -1,0 +1,58 @@
+{
+  "name": "first-network-student",
+  "version": "1.0.0",
+  "client": {
+    "organization": "Student",
+    "connection": {
+      "timeout": {
+        "peer": {
+          "endorser": "300"
+        }
+      }
+    }
+  },
+  "organizations": {
+    "Student": {
+      "mspid": "StudentMSP",
+      "peers": [
+				"peer0.student.certificate.com",
+				"peer1.student.certificate.com"
+      ],
+      "certificateAuthorities": ["ca.student.certificate.com"]
+    }
+  },
+  "peers": {
+    "peer0.student.certificate.com": {
+      "url": "grpcs://localhost:9051",
+      "tlsCACerts": {
+        "pem": "-----BEGIN CERTIFICATE-----\nMIICdDCCAhugAwIBAgIQG4W/DqDTIvBGvfQXyImczzAKBggqhkjOPQQDAjCBhDEL\nMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNhbiBG\ncmFuY2lzY28xIDAeBgNVBAoTF3N0dWRlbnQuY2VydGlmaWNhdGUuY29tMSYwJAYD\nVQQDEx10bHNjYS5zdHVkZW50LmNlcnRpZmljYXRlLmNvbTAeFw0xOTEyMTgwMjE5\nMDBaFw0yOTEyMTUwMjE5MDBaMIGEMQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2Fs\naWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZyYW5jaXNjbzEgMB4GA1UEChMXc3R1ZGVu\ndC5jZXJ0aWZpY2F0ZS5jb20xJjAkBgNVBAMTHXRsc2NhLnN0dWRlbnQuY2VydGlm\naWNhdGUuY29tMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJfJkQGFKnGDWOhOl\noeRJb5klW1HsovsznHGKPEJO9cTuTFvwIwQizSWmnIV+8nmm2/Q8ZL+1Fd56VuOO\nOTk/YKNtMGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggr\nBgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCA/n2SD36B5kEZxVjjA\n62W798nl5gZHN7h1rRDhZhfFOjAKBggqhkjOPQQDAgNHADBEAiBQPlcicr3sruvC\nJkGhyYGBk7NFdwPlwuy1Tf2dxQYB/AIgL1QKcHAZR+k8Hv+MqPAWCXM2GMwEXLYa\nbLYlk/8otN8=\n-----END CERTIFICATE-----\n"
+      },
+      "grpcOptions": {
+        "ssl-target-name-override": "peer0.student.certificate.com",
+        "hostnameOverride": "peer0.student.certificate.com"
+      }
+    },
+    "peer1.student.certificate.com": {
+      "url": "grpcs://localhost:10051",
+      "tlsCACerts": {
+        "pem": "-----BEGIN CERTIFICATE-----\nMIICdDCCAhugAwIBAgIQG4W/DqDTIvBGvfQXyImczzAKBggqhkjOPQQDAjCBhDEL\nMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNhbiBG\ncmFuY2lzY28xIDAeBgNVBAoTF3N0dWRlbnQuY2VydGlmaWNhdGUuY29tMSYwJAYD\nVQQDEx10bHNjYS5zdHVkZW50LmNlcnRpZmljYXRlLmNvbTAeFw0xOTEyMTgwMjE5\nMDBaFw0yOTEyMTUwMjE5MDBaMIGEMQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2Fs\naWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZyYW5jaXNjbzEgMB4GA1UEChMXc3R1ZGVu\ndC5jZXJ0aWZpY2F0ZS5jb20xJjAkBgNVBAMTHXRsc2NhLnN0dWRlbnQuY2VydGlm\naWNhdGUuY29tMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJfJkQGFKnGDWOhOl\noeRJb5klW1HsovsznHGKPEJO9cTuTFvwIwQizSWmnIV+8nmm2/Q8ZL+1Fd56VuOO\nOTk/YKNtMGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggr\nBgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCA/n2SD36B5kEZxVjjA\n62W798nl5gZHN7h1rRDhZhfFOjAKBggqhkjOPQQDAgNHADBEAiBQPlcicr3sruvC\nJkGhyYGBk7NFdwPlwuy1Tf2dxQYB/AIgL1QKcHAZR+k8Hv+MqPAWCXM2GMwEXLYa\nbLYlk/8otN8=\n-----END CERTIFICATE-----\n"
+      },
+      "grpcOptions": {
+        "ssl-target-name-override": "peer1.student.certificate.com",
+        "hostnameOverride": "peer1.student.certificate.com"
+      }
+    }
+  },
+  "certificateAuthorities": {
+    "ca.student.certificate.com": {
+      "url": "https://localhost:8054",
+      "caName": "ca.student.certificate.com",
+      "tlsCACerts": {
+        "pem": "-----BEGIN CERTIFICATE-----\nMIICcDCCAhagAwIBAgIRAL2r4VLIHfKIcDvQB6O4+B8wCgYIKoZIzj0EAwIwgYEx\nCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1TYW4g\nRnJhbmNpc2NvMSAwHgYDVQQKExdzdHVkZW50LmNlcnRpZmljYXRlLmNvbTEjMCEG\nA1UEAxMaY2Euc3R1ZGVudC5jZXJ0aWZpY2F0ZS5jb20wHhcNMTkxMjE4MDIxOTAw\nWhcNMjkxMjE1MDIxOTAwWjCBgTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlm\nb3JuaWExFjAUBgNVBAcTDVNhbiBGcmFuY2lzY28xIDAeBgNVBAoTF3N0dWRlbnQu\nY2VydGlmaWNhdGUuY29tMSMwIQYDVQQDExpjYS5zdHVkZW50LmNlcnRpZmljYXRl\nLmNvbTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABCfNTCf93MGZJYp1xD5g/K7t\n04GJN+WoCwZErlRaAL9JH22y2+Sc2W4d/b/VK5SCoSGMip0tLDhKwwbcUzK+kjaj\nbTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUH\nAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQgwAEDRkrolvxvJxY/FFOViK6t\nbvkdcG7pfL1svfi1c8YwCgYIKoZIzj0EAwIDSAAwRQIhAIkBOY/PpMC6nTM+53JW\n5k0TjmZL4JACOKEtoGL7jxJEAiAno4xhFc6zOSf2vrJ6tGLS3m/dfvTlKA6ZM8V1\nXWKXFw==\n-----END CERTIFICATE-----\n"
+      },
+      "httpOptions": {
+        "verify": false
+      }
+    }
+  }
+}

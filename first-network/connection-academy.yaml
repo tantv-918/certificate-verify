@@ -1,0 +1,91 @@
+---
+name: first-network-academy
+version: 1.0.0
+client:
+  organization: Academy
+  connection:
+    timeout:
+      peer:
+        endorser: "300"
+organizations:
+  Academy:
+    mspid: AcademyMSP
+    peers:
+      - peer0.academy.certificate.com
+      - peer1.academy.certificate.com
+    certificateAuthorities:
+      - ca.academy.certificate.com
+peers:
+  peer0.academy.certificate.com:
+    url: grpcs://localhost:7051
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICdjCCAhygAwIBAgIRAPKlHZOicHa9iNj7bCpOIGYwCgYIKoZIzj0EAwIwgYQx
+        CzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1TYW4g
+        RnJhbmNpc2NvMSAwHgYDVQQKExdhY2FkZW15LmNlcnRpZmljYXRlLmNvbTEmMCQG
+        A1UEAxMddGxzY2EuYWNhZGVteS5jZXJ0aWZpY2F0ZS5jb20wHhcNMTkxMjE4MDIx
+        OTAwWhcNMjkxMjE1MDIxOTAwWjCBhDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNh
+        bGlmb3JuaWExFjAUBgNVBAcTDVNhbiBGcmFuY2lzY28xIDAeBgNVBAoTF2FjYWRl
+        bXkuY2VydGlmaWNhdGUuY29tMSYwJAYDVQQDEx10bHNjYS5hY2FkZW15LmNlcnRp
+        ZmljYXRlLmNvbTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABI5DeV4GqFAFS3Gj
+        ix8Cpvuc/jB3aaYCGO+weYtmHLwLBgmcC72DH9FEV9eKU5bUvH4R+UlL0SD+Uyyi
+        IonisiijbTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYI
+        KwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQguUF4CFwdniOsgdBw
+        YfQuL0dltyM6JzXqlVir5NYkeh4wCgYIKoZIzj0EAwIDSAAwRQIhAOGsNxvxW3QV
+        yMd2ckvdFbMTNf9Frada6TxyzsvFB2WhAiAQJ3D1WPmQJ/d1JyTeIodwrnkycXlf
+        FguffJ9s4CfGHg==
+        -----END CERTIFICATE-----
+        
+    grpcOptions:
+      ssl-target-name-override: peer0.academy.certificate.com
+      hostnameOverride: peer0.academy.certificate.com
+  peer1.academy.certificate.com:
+    url: grpcs://localhost:8051
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICdjCCAhygAwIBAgIRAPKlHZOicHa9iNj7bCpOIGYwCgYIKoZIzj0EAwIwgYQx
+        CzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1TYW4g
+        RnJhbmNpc2NvMSAwHgYDVQQKExdhY2FkZW15LmNlcnRpZmljYXRlLmNvbTEmMCQG
+        A1UEAxMddGxzY2EuYWNhZGVteS5jZXJ0aWZpY2F0ZS5jb20wHhcNMTkxMjE4MDIx
+        OTAwWhcNMjkxMjE1MDIxOTAwWjCBhDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNh
+        bGlmb3JuaWExFjAUBgNVBAcTDVNhbiBGcmFuY2lzY28xIDAeBgNVBAoTF2FjYWRl
+        bXkuY2VydGlmaWNhdGUuY29tMSYwJAYDVQQDEx10bHNjYS5hY2FkZW15LmNlcnRp
+        ZmljYXRlLmNvbTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABI5DeV4GqFAFS3Gj
+        ix8Cpvuc/jB3aaYCGO+weYtmHLwLBgmcC72DH9FEV9eKU5bUvH4R+UlL0SD+Uyyi
+        IonisiijbTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNVHSUEFjAUBggrBgEFBQcDAgYI
+        KwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNVHQ4EIgQguUF4CFwdniOsgdBw
+        YfQuL0dltyM6JzXqlVir5NYkeh4wCgYIKoZIzj0EAwIDSAAwRQIhAOGsNxvxW3QV
+        yMd2ckvdFbMTNf9Frada6TxyzsvFB2WhAiAQJ3D1WPmQJ/d1JyTeIodwrnkycXlf
+        FguffJ9s4CfGHg==
+        -----END CERTIFICATE-----
+        
+    grpcOptions:
+      ssl-target-name-override: peer1.academy.certificate.com
+      hostnameOverride: peer1.academy.certificate.com
+certificateAuthorities:
+  ca.academy.certificate.com:
+    url: https://localhost:7054
+    caName: ca.academy.certificate.com
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIICbzCCAhWgAwIBAgIQDqGDB/7pM0DI89ygHmhrjjAKBggqhkjOPQQDAjCBgTEL
+        MAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNhbiBG
+        cmFuY2lzY28xIDAeBgNVBAoTF2FjYWRlbXkuY2VydGlmaWNhdGUuY29tMSMwIQYD
+        VQQDExpjYS5hY2FkZW15LmNlcnRpZmljYXRlLmNvbTAeFw0xOTEyMTgwMjE5MDBa
+        Fw0yOTEyMTUwMjE5MDBaMIGBMQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZv
+        cm5pYTEWMBQGA1UEBxMNU2FuIEZyYW5jaXNjbzEgMB4GA1UEChMXYWNhZGVteS5j
+        ZXJ0aWZpY2F0ZS5jb20xIzAhBgNVBAMTGmNhLmFjYWRlbXkuY2VydGlmaWNhdGUu
+        Y29tMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE3KfA5eSbXHq+5DOnDZKu6XZG
+        dZFqUVbikIgc7PhaNYvcZyMdgXHy4yPCrTiOc22X6hDfjLnV7F2FQkmSu3cokKNt
+        MGswDgYDVR0PAQH/BAQDAgGmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcD
+        ATAPBgNVHRMBAf8EBTADAQH/MCkGA1UdDgQiBCAhOHn0TmRYn4jI7huNPORh2bK9
+        TX2B5CLz3KbPdfxYcTAKBggqhkjOPQQDAgNIADBFAiEA4p6AtelexWiS1x8WWZfH
+        bn8SmwjDDBKHhqNdYqFDBosCIGVtuv+T5jw6jc6Z8g6IRMQirlohZSVQ4vZy0M6R
+        Rn5N
+        -----END CERTIFICATE-----
+        
+    httpOptions:
+      verify: false

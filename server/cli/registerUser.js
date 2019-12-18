@@ -1,23 +1,27 @@
-'use strict';
+"use strict";
 
-const argv = require('yargs').argv;
-const { FileSystemWallet, Gateway, X509WalletMixin } = require('fabric-network');
-const path = require('path');
-const User = require('../models/User');
-const USER_ROLES = require('../configs/constant').USER_ROLES;
+const argv = require("yargs").argv;
+const {
+  FileSystemWallet,
+  Gateway,
+  X509WalletMixin
+} = require("fabric-network");
+const path = require("path");
+const User = require("../models/User");
+const USER_ROLES = require("../configs/constant").USER_ROLES;
 
-const mongoose = require('mongoose');
-require('dotenv').config();
+const mongoose = require("mongoose");
+require("dotenv").config();
 
 // Connect database
 mongoose.connect(
   process.env.MONGODB_URI,
   { useUnifiedTopology: true, useNewUrlParser: true },
-  (error) => {
+  error => {
     if (error) console.log(error);
   }
 );
-mongoose.set('useCreateIndex', true);
+mongoose.set("useCreateIndex", true);
 
 /**
  * Register user for org
@@ -30,7 +34,7 @@ async function main() {
     let username;
     let password;
     let fullname;
-    let orgMSP = 'student';
+    let orgMSP = "student";
     let admin;
 
     if (!argv.username) {
@@ -55,16 +59,21 @@ async function main() {
     if (argv.orgMSP) {
       orgMSP = argv.orgMSP.toString();
     }
-    if (orgMSP === 'student') {
+    if (orgMSP === "student") {
       admin = process.env.ADMIN_STUDENT_USERNAME;
     }
-    if (orgMSP === 'academy') {
+    if (orgMSP === "academy") {
       admin = process.env.ADMIN_ACADEMY_USERNAME;
     }
 
     let nameMSP = await changeCaseFirstLetter(orgMSP);
 
-    const ccpPath = path.resolve(__dirname, '../..', 'network', `connection-${orgMSP}.json`);
+    const ccpPath = path.resolve(
+      __dirname,
+      "../..",
+      "first-network",
+      `connection-${orgMSP}.json`
+    );
 
     // Create a new file system based wallet for managing identities.
     const walletPath = path.join(process.cwd(), `wallet-${orgMSP}`);
@@ -73,7 +82,9 @@ async function main() {
     // Check to see if we've already enrolled the user.
     const userExists = await wallet.exists(username);
     if (userExists) {
-      console.log(`An identity for the user ${username} already exists in the wallet-${orgMSP}`);
+      console.log(
+        `An identity for the user ${username} already exists in the wallet-${orgMSP}`
+      );
       return;
     }
 
@@ -81,7 +92,7 @@ async function main() {
     const adminExists = await wallet.exists(admin);
     if (!adminExists) {
       console.log(`Admin user ${admin} does not exist in the wallet`);
-      console.log('Run the enrollAdmin.js application before retrying');
+      console.log("Run the enrollAdmin.js application before retrying");
       return;
     }
 
@@ -96,20 +107,20 @@ async function main() {
     // Get the CA client object from the gateway for interacting with the CA.
     const ca = gateway.getClient().getCertificateAuthority();
     const adminIdentity = gateway.getCurrentIdentity();
-    const network = await gateway.getNetwork('certificatechannel');
-    const contract = await network.getContract('academy');
+    const network = await gateway.getNetwork("certificatechannel");
+    const contract = await network.getContract("academy");
 
     let user;
 
-    if (orgMSP === 'student') {
-      await contract.submitTransaction('CreateStudent', username, fullname);
+    if (orgMSP === "student") {
+      await contract.submitTransaction("CreateStudent", username, fullname);
       user = new User({
         username: username,
         password: password,
         role: USER_ROLES.STUDENT
       });
-    } else if (orgMSP === 'academy') {
-      await contract.submitTransaction('CreateTeacher', username, fullname);
+    } else if (orgMSP === "academy") {
+      await contract.submitTransaction("CreateTeacher", username, fullname);
       user = new User({
         username: username,
         password: password,
@@ -123,10 +134,10 @@ async function main() {
         //Register the user, enroll the user, and import the new identity into the wallet.
         const secret = await ca.register(
           {
-            affiliation: '',
+            affiliation: "",
             enrollmentID: user.username,
-            role: 'client',
-            attrs: [{ name: 'username', value: user.username, ecert: true }]
+            role: "client",
+            attrs: [{ name: "username", value: user.username, ecert: true }]
           },
           adminIdentity
         );
@@ -157,7 +168,7 @@ async function main() {
 }
 
 function changeCaseFirstLetter(params) {
-  if (typeof params === 'string') {
+  if (typeof params === "string") {
     return params.charAt(0).toUpperCase() + params.slice(1);
   }
   return null;

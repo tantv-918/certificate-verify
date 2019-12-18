@@ -38,7 +38,7 @@
       "mspid": "AcademyMSP",
       "fullpath": true,
       "adminPrivateKey": {
-        "path": "../network/crypto-config/peerOrganizations/academy.certificate.com/users/Admin@academy.certificate.com/msp/keystore/ff8ca730a261321ef3451fa51b47a251ff5b224d35ec7cc99dc7eaee449b0fd4_sk"
+        "path": "../network/crypto-config/peerOrganizations/academy.certificate.com/users/Admin@academy.certificate.com/msp/keystore/55700783445884d24aa2a75cb19f46cd41aa317f75a1ab6eb902e9f26cd7de5d_sk"
       },
       "signedCert": {
         "path": "../network/crypto-config/peerOrganizations/academy.certificate.com/users/Admin@academy.certificate.com/msp/signcerts/Admin@academy.certificate.com-cert.pem"
