@@ -15,6 +15,7 @@ mongoose.connect(
     if (error) console.log(error);
   }
 );
+
 mongoose.set('useCreateIndex', true);
 
 exports.connectToNetwork = async function(user, cli = false) {
@@ -38,7 +39,7 @@ exports.connectToNetwork = async function(user, cli = false) {
 
     let identity = user.username;
 
-    const ccpPath = path.resolve(__dirname, '../..', 'network', `connection-${orgMSP}.json`);
+    const ccpPath = path.resolve(__dirname, '../..', 'first-network', `connection-${orgMSP}.json`);
     let walletPath = path.join(process.cwd(), `cli/wallet-${orgMSP}`);
 
     if (cli) {
@@ -152,7 +153,7 @@ exports.registerTeacherOnBlockchain = async function(networkObj, createdUser) {
   var nameMSP = 'Academy';
 
   try {
-    const ccpPath = path.resolve(__dirname, '../..', 'network', `connection-${orgMSP}.json`);
+    const ccpPath = path.resolve(__dirname, '../..', 'first-network', `connection-${orgMSP}.json`);
     const walletPath = path.join(process.cwd(), `/cli/wallet-${orgMSP}`);
     const wallet = new FileSystemWallet(walletPath);
 
@@ -179,33 +180,33 @@ exports.registerTeacherOnBlockchain = async function(networkObj, createdUser) {
       role: USER_ROLES.TEACHER
     });
 
-    await teacher.save(async (err, user) => {
-      if (err) throw err;
-      if (user) {
-        const secret = await ca.register(
-          {
-            affiliation: '',
-            enrollmentID: user.username,
-            role: 'client',
-            attrs: [{ name: 'username', value: user.username, ecert: true }]
-          },
-          adminIdentity
-        );
+    let user = await teacher.save();
 
-        const enrollment = await ca.enroll({
+    if (user) {
+      const secret = await ca.register(
+        {
+          affiliation: '',
           enrollmentID: user.username,
-          enrollmentSecret: secret
-        });
+          role: 'client',
+          attrs: [{ name: 'username', value: user.username, ecert: true }]
+        },
+        adminIdentity
+      );
 
-        const userIdentity = X509WalletMixin.createIdentity(
-          `${nameMSP}MSP`,
-          enrollment.certificate,
-          enrollment.key.toBytes()
-        );
+      const enrollment = await ca.enroll({
+        enrollmentID: user.username,
+        enrollmentSecret: secret
+      });
 
-        await wallet.import(user.username, userIdentity);
-      }
-    });
+      const userIdentity = X509WalletMixin.createIdentity(
+        `${nameMSP}MSP`,
+        enrollment.certificate,
+        enrollment.key.toBytes()
+      );
+
+      await wallet.import(user.username, userIdentity);
+    }
+
     let response = {
       success: true,
       msg: 'Register success!'
@@ -229,7 +230,7 @@ exports.registerStudentOnBlockchain = async function(createdUser) {
   var nameMSP = 'Student';
 
   try {
-    const ccpPath = path.resolve(__dirname, '../..', 'network', `connection-${orgMSP}.json`);
+    const ccpPath = path.resolve(__dirname, '../..', 'first-network', `connection-${orgMSP}.json`);
     const walletPath = path.join(process.cwd(), `/cli/wallet-${orgMSP}`);
     const wallet = new FileSystemWallet(walletPath);
 
@@ -266,33 +267,32 @@ exports.registerStudentOnBlockchain = async function(createdUser) {
       role: USER_ROLES.STUDENT
     });
 
-    await user.save(async (err, user) => {
-      if (err) throw err;
-      if (user) {
-        const secret = await ca.register(
-          {
-            affiliation: '',
-            enrollmentID: identity,
-            role: 'client',
-            attrs: [{ name: 'username', value: identity, ecert: true }]
-          },
-          adminIdentity
-        );
+    let userSaved = await user.save();
 
-        const enrollment = await ca.enroll({
+    if (userSaved) {
+      const secret = await ca.register(
+        {
+          affiliation: '',
           enrollmentID: identity,
-          enrollmentSecret: secret
-        });
+          role: 'client',
+          attrs: [{ name: 'username', value: identity, ecert: true }]
+        },
+        adminIdentity
+      );
 
-        const userIdentity = X509WalletMixin.createIdentity(
-          `${nameMSP}MSP`,
-          enrollment.certificate,
-          enrollment.key.toBytes()
-        );
+      const enrollment = await ca.enroll({
+        enrollmentID: identity,
+        enrollmentSecret: secret
+      });
 
-        await wallet.import(identity, userIdentity);
-      }
-    });
+      const userIdentity = X509WalletMixin.createIdentity(
+        `${nameMSP}MSP`,
+        enrollment.certificate,
+        enrollment.key.toBytes()
+      );
+
+      await wallet.import(identity, userIdentity);
+    }
 
     let response = {
       success: true,
@@ -381,8 +381,9 @@ exports.createCertificate = async function(networkObj, certificate) {
     response.error = 'Error! You need to fill all fields before you can register!';
     return response;
   }
-
+  console.log(certificate, '   aaaa');
   try {
+    console.log(certificate, ' bbbb');
     await networkObj.contract.submitTransaction(
       'CreateCertificate',
       certificate.certificateID,
@@ -398,14 +399,7 @@ exports.createCertificate = async function(networkObj, certificate) {
       issueDate: certificate.issueDate
     });
 
-    await certificateData.save(async (err, cert) => {
-      if (err) {
-        return (response = {
-          success: false,
-          msg: error
-        });
-      }
-    });
+    await certificateData.save();
 
     let response = {
       success: true,
@@ -419,6 +413,7 @@ exports.createCertificate = async function(networkObj, certificate) {
       success: false,
       msg: error
     };
+    console.log(error);
     return response;
   }
 };
@@ -453,7 +448,6 @@ exports.registerTeacherForSubject = async function(networkObj, subjectID, teache
 };
 
 exports.registerStudentForSubject = async function(networkObj, subjectID, studentUsername) {
-  console.log(subjectID);
   if (!subjectID || !studentUsername) {
     let response = {};
     response.error = 'Error! You need to fill all fields before you can register!';
